@@ -91,7 +91,7 @@ Resources:
       Runtime: python3.13
       Handler: app.main.handler
       Role: !GetAtt ApiRole.Arn
-      MemorySize: 768
+      MemorySize: 512
       Timeout: 30
       Code:
         S3Bucket: !Ref CodeBucket
