@@ -1,0 +1,23 @@
+name: Public demo health
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Verify health, readiness, and the 20-operation contract
+        env:
+          BASE_URL: ${{ vars.DEMO_BASE_URL }}
+        run: python scripts/check_live.py

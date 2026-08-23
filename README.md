@@ -8,16 +8,20 @@ The repository intentionally exposes a compact but realistic product domain—to
 
 | Item | Value |
 | --- | --- |
+| Public API | `https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws` |
+| Public Swagger UI | `https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/docs` |
+| Public OpenAPI JSON | `https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/openapi.json` |
 | Local API | `http://127.0.0.1:8000` |
 | Swagger UI | `http://127.0.0.1:8000/docs` |
 | OpenAPI JSON | `http://127.0.0.1:8000/openapi.json` |
 | Demo email | `demo@preman.live` |
 | Demo password | `PremanDemo123!` |
 
-The public hackathon URL is injected at deployment time. Run all 20 operations against either local or public infrastructure with:
+Run all 20 operations against either local or public infrastructure with:
 
 ```bash
-BASE_URL=https://your-api.example.com python scripts/live_smoke.py
+BASE_URL=https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws \
+  uv run python scripts/live_smoke.py
 ```
 
 > The demo credentials are public by design and must never be reused for a production system.
@@ -121,6 +125,10 @@ On first startup, the service creates the public demo account plus a representat
 - health, readiness, and documentation routes stay operational.
 
 `scripts/live_smoke.py` makes the same checks through real HTTP. Point it at the stable public URL before the presentation to catch DNS, TLS, platform, or database regressions that an in-process test cannot see.
+
+GitHub Actions also checks the public service every 15 minutes without mutating demo
+data. It verifies liveness, readiness, and that the deployed OpenAPI document still
+contains exactly 20 product operations.
 
 ## PreMan demo flow
 
