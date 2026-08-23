@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "greptile-codex-backend"
+version = "1.0.0"
+description = "A production-shaped demo API for the PreMan hackathon"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "bcrypt>=4.2,<5",
+  "boto3>=1.35,<2",
+  "email-validator>=2.2,<3",
+  "fastapi>=0.115,<1",
+  "mangum>=0.19,<1",
+  "pydantic-settings>=2.6,<3",
+  "pyjwt>=2.9,<3",
+  "uvicorn[standard]>=0.32,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.27,<1",
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.8,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = ["B008"] # FastAPI intentionally declares dependencies in defaults.

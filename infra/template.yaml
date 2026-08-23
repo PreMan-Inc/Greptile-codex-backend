@@ -1,0 +1,147 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Always-on hackathon demo API using Lambda and DynamoDB.
+
+Parameters:
+  CodeBucket:
+    Type: String
+  CodeKey:
+    Type: String
+  DemoPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 12
+    Default: PremanDemo123!
+
+Resources:
+  JwtSigningSecret:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: Stable JWT signing key for the PreMan hackathon API.
+      GenerateSecretString:
+        SecretStringTemplate: "{}"
+        GenerateStringKey: jwt_secret
+        PasswordLength: 64
+        ExcludePunctuation: true
+      Tags:
+        - Key: application
+          Value: greptile-codex-backend
+        - Key: environment
+          Value: hackathon-demo
+
+  DemoData:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      Tags:
+        - Key: application
+          Value: greptile-codex-backend
+        - Key: environment
+          Value: hackathon-demo
+
+  ApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DemoDataAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:BatchWriteItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt DemoData.Arn
+
+  ApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Architectures:
+        - arm64
+      Runtime: python3.13
+      Handler: app.main.handler
+      Role: !GetAtt ApiRole.Arn
+      MemorySize: 768
+      Timeout: 30
+      Code:
+        S3Bucket: !Ref CodeBucket
+        S3Key: !Ref CodeKey
+      Environment:
+        Variables:
+          APP_ENV: demo
+          STORAGE_BACKEND: dynamodb
+          TABLE_NAME: !Ref DemoData
+          JWT_SECRET: !Sub "{{resolve:secretsmanager:${JwtSigningSecret}:SecretString:jwt_secret}}"
+          DEMO_USER_PASSWORD: !Ref DemoPassword
+      Tags:
+        - Key: application
+          Value: greptile-codex-backend
+        - Key: environment
+          Value: hackathon-demo
+
+  ApiFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      InvokeMode: BUFFERED
+      TargetFunctionArn: !GetAtt ApiFunction.Arn
+
+  PublicFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunctionUrl
+      FunctionName: !Ref ApiFunction
+      FunctionUrlAuthType: NONE
+      Principal: "*"
+
+  PublicInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ApiFunction
+      InvokedViaFunctionUrl: true
+      Principal: "*"
+
+Outputs:
+  ApiUrl:
+    Description: Stable public URL for the hackathon backend.
+    Value: !GetAtt ApiFunctionUrl.FunctionUrl
+  TableName:
+    Description: DynamoDB table used by the demo API.
+    Value: !Ref DemoData
+  FunctionName:
+    Description: Lambda function name.
+    Value: !Ref ApiFunction
+  JwtSecretArn:
+    Description: Retained Secrets Manager secret that keeps tokens stable across deploys.
+    Value: !Ref JwtSigningSecret
