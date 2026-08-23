@@ -2,7 +2,7 @@
 
 A production-shaped FastAPI backend built to demonstrate PreMan's promise: developers ship API code, while autonomous testing continuously discovers endpoints, learns their schemas, and verifies them.
 
-The repository intentionally exposes a compact but realistic product domain—token auth, profiles, projects, and tasks—through exactly **20 versioned API operations**. It includes deterministic seed data, interactive OpenAPI documentation, isolated contract tests, and a non-destructive live smoke runner that exercises every operation.
+The repository intentionally exposes a compact but realistic product domain—token auth, profiles, projects, and tasks—through exactly **22 versioned API operations**. The resource APIs cover the common REST method surface: `GET`, `POST`, complete replacement with `PUT`, partial updates with `PATCH`, deletion with `DELETE`, and CORS preflight with `OPTIONS`. It includes deterministic seed data, interactive OpenAPI documentation, isolated contract tests, and a live agent matrix that exercises both success paths and edge cases.
 
 ## Demo access
 
@@ -17,7 +17,7 @@ The repository intentionally exposes a compact but realistic product domain—to
 | Demo email | `demo@preman.live` |
 | Demo password | `PremanDemo123!` |
 
-Run all 20 operations against either local or public infrastructure with:
+Run all 22 operations and the agent edge matrix against either local or public infrastructure with:
 
 ```bash
 BASE_URL=https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws \
@@ -26,9 +26,9 @@ BASE_URL=https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws \
 
 > The demo credentials are public by design and must never be reused for a production system.
 
-## The 20-operation contract
+## The 22-operation contract
 
-Operational routes such as `/`, `/ready`, `/docs`, and `/openapi.json` are useful at runtime but do not count toward the 20 demo operations.
+Operational routes such as `/`, `/ready`, `/docs`, and `/openapi.json` are useful at runtime but do not count toward the 22 demo operations.
 
 | # | Method | Path | Purpose | Auth |
 | ---: | --- | --- | --- | --- |
@@ -45,13 +45,15 @@ Operational routes such as `/`, `/ready`, `/docs`, and `/openapi.json` are usefu
 | 11 | `GET` | `/api/v1/projects` | List owned projects | Bearer |
 | 12 | `POST` | `/api/v1/projects` | Create a project | Bearer |
 | 13 | `GET` | `/api/v1/projects/{project_id}` | Read a project | Bearer |
-| 14 | `PATCH` | `/api/v1/projects/{project_id}` | Update a project | Bearer |
-| 15 | `DELETE` | `/api/v1/projects/{project_id}` | Delete a project and its tasks | Bearer |
-| 16 | `GET` | `/api/v1/projects/{project_id}/tasks` | List a project's tasks | Bearer |
-| 17 | `POST` | `/api/v1/projects/{project_id}/tasks` | Create a task | Bearer |
-| 18 | `GET` | `/api/v1/tasks/{task_id}` | Read a task | Bearer |
-| 19 | `PATCH` | `/api/v1/tasks/{task_id}` | Update a task | Bearer |
-| 20 | `DELETE` | `/api/v1/tasks/{task_id}` | Delete a task | Bearer |
+| 14 | `PUT` | `/api/v1/projects/{project_id}` | Completely replace a project | Bearer |
+| 15 | `PATCH` | `/api/v1/projects/{project_id}` | Partially update a project | Bearer |
+| 16 | `DELETE` | `/api/v1/projects/{project_id}` | Delete a project and its tasks | Bearer |
+| 17 | `GET` | `/api/v1/projects/{project_id}/tasks` | List a project's tasks | Bearer |
+| 18 | `POST` | `/api/v1/projects/{project_id}/tasks` | Create a task | Bearer |
+| 19 | `GET` | `/api/v1/tasks/{task_id}` | Read a task | Bearer |
+| 20 | `PUT` | `/api/v1/tasks/{task_id}` | Completely replace a task | Bearer |
+| 21 | `PATCH` | `/api/v1/tasks/{task_id}` | Partially update a task | Bearer |
+| 22 | `DELETE` | `/api/v1/tasks/{task_id}` | Delete a task | Bearer |
 
 ## Run locally
 
@@ -117,10 +119,11 @@ On first startup, the service creates the public demo account plus a representat
 
 `tests/` verifies:
 
-- the OpenAPI document contains the exact 20-operation contract;
+- the OpenAPI document contains the exact 22-operation contract;
 - success and validation schemas for auth, profile, project, and task lifecycles;
 - token rotation, revocation, password reset, and password changes;
-- ownership boundaries and missing-resource behavior;
+- complete `PUT` replacement versus partial `PATCH` semantics;
+- ownership boundaries, validation limits, filtering, pagination, replay, and missing-resource behavior;
 - seeded demo data remains queryable; and
 - health, readiness, and documentation routes stay operational.
 
@@ -128,12 +131,12 @@ On first startup, the service creates the public demo account plus a representat
 
 GitHub Actions also checks the public service every 15 minutes without mutating demo
 data. It verifies liveness, readiness, and that the deployed OpenAPI document still
-contains exactly 20 product operations.
+contains exactly 22 product operations.
 
 ## PreMan demo flow
 
 1. Connect this repository and the public base URL to PreMan.
-2. Let PreMan ingest `/openapi.json` and discover all 20 operations.
+2. Let PreMan ingest `/openapi.json` and discover all 22 operations.
 3. Make an API change and push it—without writing a manual request collection.
 4. Show PreMan updating schemas and exercising the affected endpoint.
 5. Use the public demo credential when an authenticated call is required.

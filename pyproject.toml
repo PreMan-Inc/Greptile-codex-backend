@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "greptile-codex-backend"
-version = "1.0.0"
+version = "1.1.0"
 description = "A production-shaped demo API for the PreMan hackathon"
 readme = "README.md"
 requires-python = ">=3.12"

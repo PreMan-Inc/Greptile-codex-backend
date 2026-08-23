@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise the exact 20-operation API contract through real HTTP.
+"""Exercise the exact 22-operation API contract and agent edge cases through real HTTP.
 
 The runner creates a unique temporary user and owns every mutable resource it
 touches. The seeded demo account is only used to prove deterministic login.
@@ -194,7 +194,19 @@ def main() -> int:
     step(13, "GET", f"/api/v1/projects/{project_id}")
     request("GET", f"/api/v1/projects/{project_id}", token=access_token)
 
-    step(14, "PATCH", f"/api/v1/projects/{project_id}")
+    step(14, "PUT", f"/api/v1/projects/{project_id}")
+    request(
+        "PUT",
+        f"/api/v1/projects/{project_id}",
+        token=access_token,
+        json_body={
+            "name": f"Replaced Smoke Project {suffix}",
+            "description": "Complete replacement through real HTTP",
+            "status": "active",
+        },
+    )
+
+    step(15, "PATCH", f"/api/v1/projects/{project_id}")
     request(
         "PATCH",
         f"/api/v1/projects/{project_id}",
@@ -202,10 +214,10 @@ def main() -> int:
         json_body={"description": "Updated by the live smoke test"},
     )
 
-    step(16, "GET", f"/api/v1/projects/{project_id}/tasks")
+    step(17, "GET", f"/api/v1/projects/{project_id}/tasks")
     request("GET", f"/api/v1/projects/{project_id}/tasks", token=access_token)
 
-    step(17, "POST", f"/api/v1/projects/{project_id}/tasks")
+    step(18, "POST", f"/api/v1/projects/{project_id}/tasks")
     task = request(
         "POST",
         f"/api/v1/projects/{project_id}/tasks",
@@ -220,10 +232,24 @@ def main() -> int:
     ).body
     task_id = value(task, "id")
 
-    step(18, "GET", f"/api/v1/tasks/{task_id}")
+    step(19, "GET", f"/api/v1/tasks/{task_id}")
     request("GET", f"/api/v1/tasks/{task_id}", token=access_token)
 
-    step(19, "PATCH", f"/api/v1/tasks/{task_id}")
+    step(20, "PUT", f"/api/v1/tasks/{task_id}")
+    request(
+        "PUT",
+        f"/api/v1/tasks/{task_id}",
+        token=access_token,
+        json_body={
+            "title": f"Replaced Smoke Task {suffix}",
+            "description": "Complete task replacement through real HTTP",
+            "status": "in_progress",
+            "priority": "low",
+            "due_at": "2026-09-01T12:00:00Z",
+        },
+    )
+
+    step(21, "PATCH", f"/api/v1/tasks/{task_id}")
     request(
         "PATCH",
         f"/api/v1/tasks/{task_id}",
@@ -231,21 +257,74 @@ def main() -> int:
         json_body={"status": "done", "priority": "medium"},
     )
 
-    step(20, "DELETE", f"/api/v1/tasks/{task_id}")
+    print("\n[agent edge cases] authentication, validation, ownership, and replay")
+    request("GET", "/api/v1/projects", expected=401)
+    request(
+        "POST",
+        "/api/v1/auth/register",
+        json_body={"email": email, "password": final_password, "name": "Duplicate"},
+        expected=409,
+    )
+    request(
+        "POST",
+        "/api/v1/projects",
+        token=access_token,
+        json_body={"name": "x", "unexpected": True},
+        expected=422,
+    )
+    request(
+        "PUT",
+        f"/api/v1/projects/{project_id}",
+        token=access_token,
+        json_body={"name": "Incomplete replacement"},
+        expected=422,
+    )
+    request(
+        "POST",
+        f"/api/v1/projects/{project_id}/tasks",
+        token=access_token,
+        json_body={"title": "Naive date", "due_at": "2026-09-01T12:00:00"},
+        expected=422,
+    )
+    request("GET", "/api/v1/projects?limit=0", token=access_token, expected=422)
+
+    intruder_email = f"preman-intruder-{suffix}@example.com"
+    intruder = request(
+        "POST",
+        "/api/v1/auth/register",
+        json_body={
+            "email": intruder_email,
+            "password": password,
+            "name": "Ownership Probe",
+        },
+        expected=201,
+    ).body
+    intruder_token = value(intruder, "access_token")
+    request(
+        "GET",
+        f"/api/v1/projects/{project_id}",
+        token=intruder_token,
+        expected=404,
+    )
+    request("GET", f"/api/v1/tasks/{task_id}", token=intruder_token, expected=404)
+
+    step(22, "DELETE", f"/api/v1/tasks/{task_id}")
     request(
         "DELETE",
         f"/api/v1/tasks/{task_id}",
         token=access_token,
         expected=(200, 204),
     )
+    request("DELETE", f"/api/v1/tasks/{task_id}", token=access_token, expected=404)
 
-    step(15, "DELETE", f"/api/v1/projects/{project_id}")
+    step(16, "DELETE", f"/api/v1/projects/{project_id}")
     request(
         "DELETE",
         f"/api/v1/projects/{project_id}",
         token=access_token,
         expected=(200, 204),
     )
+    request("GET", f"/api/v1/projects/{project_id}", token=access_token, expected=404)
 
     # A final deterministic login catches accidental seed/credential regressions.
     request(
@@ -254,7 +333,7 @@ def main() -> int:
         json_body={"email": DEMO_EMAIL, "password": DEMO_PASSWORD},
     )
 
-    print(f"\nPASS: all 20 API operations succeeded against {BASE_URL}")
+    print(f"\nPASS: all 22 API operations and the agent edge matrix succeeded against {BASE_URL}")
     return 0
 
 

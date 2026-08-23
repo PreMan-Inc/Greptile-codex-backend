@@ -86,6 +86,12 @@ class ProjectUpdateRequest(APIModel):
     status: ProjectStatus | None = None
 
 
+class ProjectReplaceRequest(APIModel):
+    name: str = Field(min_length=2, max_length=120)
+    description: str = Field(max_length=2000)
+    status: ProjectStatus
+
+
 class ProjectResponse(APIModel):
     id: str
     owner_id: str
@@ -124,6 +130,28 @@ class TaskUpdateRequest(APIModel):
     status: TaskStatus | None = None
     priority: TaskPriority | None = None
     due_at: datetime | None = None
+
+    @field_validator("due_at")
+    @classmethod
+    def ensure_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is not None and value.tzinfo is None:
+            raise ValueError("due_at must include a timezone")
+        return value
+
+
+class TaskReplaceRequest(APIModel):
+    title: str = Field(min_length=2, max_length=160)
+    description: str = Field(max_length=4000)
+    status: TaskStatus
+    priority: TaskPriority
+    due_at: datetime | None
+
+    @field_validator("due_at")
+    @classmethod
+    def ensure_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is not None and value.tzinfo is None:
+            raise ValueError("due_at must include a timezone")
+        return value
 
 
 class TaskResponse(APIModel):

@@ -14,6 +14,7 @@ from app.repositories.base import Repository
 from app.schemas import (
     ProjectCreateRequest,
     ProjectListResponse,
+    ProjectReplaceRequest,
     ProjectResponse,
     ProjectUpdateRequest,
 )
@@ -95,6 +96,27 @@ def update_project(
         changes["updated_at"] = datetime.now(UTC)
         project = repository.update_project(project.model_copy(update=changes))
     return _response(project)
+
+
+@router.put("/{project_id}", response_model=ProjectResponse)
+def replace_project(
+    project_id: str,
+    payload: ProjectReplaceRequest,
+    user: UserRecord = Depends(get_current_user),
+    repository: Repository = Depends(get_repository),
+    settings: Settings = Depends(get_runtime_settings),
+) -> ProjectResponse:
+    require_mutable_demo_resource(settings, project_id, {DEMO_PROJECT_ID})
+    project = _get_owned_project(repository, user.id, project_id)
+    replaced = repository.update_project(
+        project.model_copy(
+            update={
+                **payload.model_dump(),
+                "updated_at": datetime.now(UTC),
+            }
+        )
+    )
+    return _response(replaced)
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)

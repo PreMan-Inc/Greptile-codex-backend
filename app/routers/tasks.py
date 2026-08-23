@@ -11,7 +11,13 @@ from app.dependencies import get_current_user, get_repository, get_runtime_setti
 from app.domain import TaskRecord, TaskStatus, UserRecord
 from app.errors import AppError
 from app.repositories.base import Repository
-from app.schemas import TaskCreateRequest, TaskListResponse, TaskResponse, TaskUpdateRequest
+from app.schemas import (
+    TaskCreateRequest,
+    TaskListResponse,
+    TaskReplaceRequest,
+    TaskResponse,
+    TaskUpdateRequest,
+)
 from app.seed import DEMO_TASK_IDS
 
 router = APIRouter(tags=["Tasks"])
@@ -106,6 +112,27 @@ def update_task(
         changes["updated_at"] = datetime.now(UTC)
         task = repository.update_task(task.model_copy(update=changes))
     return _response(task)
+
+
+@router.put("/tasks/{task_id}", response_model=TaskResponse)
+def replace_task(
+    task_id: str,
+    payload: TaskReplaceRequest,
+    user: UserRecord = Depends(get_current_user),
+    repository: Repository = Depends(get_repository),
+    settings: Settings = Depends(get_runtime_settings),
+) -> TaskResponse:
+    require_mutable_demo_resource(settings, task_id, DEMO_TASK_IDS)
+    task = _get_owned_task(repository, user.id, task_id)
+    replaced = repository.update_task(
+        task.model_copy(
+            update={
+                **payload.model_dump(),
+                "updated_at": datetime.now(UTC),
+            }
+        )
+    )
+    return _response(replaced)
 
 
 @router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)

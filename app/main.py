@@ -36,7 +36,7 @@ app = FastAPI(
         "A deterministic hackathon backend with authentication, projects, tasks, "
         "OpenAPI documentation, and stable demo data."
     ),
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -47,7 +47,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_credentials=settings.allowed_origins != ["*"],
-    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
     expose_headers=["X-Request-ID"],
 )
@@ -69,7 +69,7 @@ install_error_handlers(app)
 def root() -> dict[str, str]:
     return {
         "name": settings.app_name,
-        "version": "1.0.0",
+        "version": "1.1.0",
         "status": "online",
         "health": "/health",
         "documentation": "/docs",
@@ -90,7 +90,7 @@ def health() -> HealthResponse:
         service=settings.app_name,
         environment=settings.app_env,
         storage=settings.storage_backend,
-        version="1.0.0",
+        version="1.1.0",
         timestamp=datetime.now(UTC),
     )
 

@@ -3,9 +3,10 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 class AppError(Exception):
@@ -72,8 +73,8 @@ def install_error_handlers(app: FastAPI) -> None:
             content=_body(request, "validation_error", "Request validation failed", details),
         )
 
-    @app.exception_handler(HTTPException)
-    async def http_error_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    @app.exception_handler(StarletteHTTPException)
+    async def http_error_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
         message = str(exc.detail) if exc.detail else "Request failed"
         return JSONResponse(
             status_code=exc.status_code,

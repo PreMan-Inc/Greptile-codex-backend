@@ -28,11 +28,13 @@ EXPECTED_OPERATIONS = {
     ("GET", "/api/v1/projects"),
     ("POST", "/api/v1/projects"),
     ("GET", "/api/v1/projects/{project_id}"),
+    ("PUT", "/api/v1/projects/{project_id}"),
     ("PATCH", "/api/v1/projects/{project_id}"),
     ("DELETE", "/api/v1/projects/{project_id}"),
     ("GET", "/api/v1/projects/{project_id}/tasks"),
     ("POST", "/api/v1/projects/{project_id}/tasks"),
     ("GET", "/api/v1/tasks/{task_id}"),
+    ("PUT", "/api/v1/tasks/{task_id}"),
     ("PATCH", "/api/v1/tasks/{task_id}"),
     ("DELETE", "/api/v1/tasks/{task_id}"),
 }
@@ -89,7 +91,7 @@ def assert_error(response, *, status: int, code: str | None = None) -> dict[str,
     return body
 
 
-def test_openapi_contains_exactly_the_20_operation_contract(client: TestClient) -> None:
+def test_openapi_contains_exactly_the_22_operation_contract(client: TestClient) -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     document = response.json()
@@ -99,10 +101,10 @@ def test_openapi_contains_exactly_the_20_operation_contract(client: TestClient) 
         for path, path_item in document["paths"].items()
         if path == "/health" or path.startswith("/api/v1/")
         for method in path_item
-        if method.lower() in {"get", "post", "patch", "delete"}
+        if method.lower() in {"get", "post", "put", "patch", "delete"}
     }
     assert operations == EXPECTED_OPERATIONS
-    assert len(operations) == 20
+    assert len(operations) == 22
 
     operation_ids = []
     for method, path in operations:
@@ -300,6 +302,19 @@ def test_project_and_task_crud_lifecycle(client: TestClient) -> None:
     assert fetched.status_code == 200
     assert fetched.json() == project
 
+    replaced = client.put(
+        f"/api/v1/projects/{project_id}",
+        headers=auth_headers,
+        json={
+            "name": "Replaced Contract Project",
+            "description": "Complete replacement coverage",
+            "status": "active",
+        },
+    )
+    assert replaced.status_code == 200
+    assert replaced.json()["name"] == "Replaced Contract Project"
+    assert replaced.json()["description"] == "Complete replacement coverage"
+
     updated = client.patch(
         f"/api/v1/projects/{project_id}",
         headers=auth_headers,
@@ -340,6 +355,21 @@ def test_project_and_task_crud_lifecycle(client: TestClient) -> None:
     fetched_task = client.get(f"/api/v1/tasks/{task_id}", headers=auth_headers)
     assert fetched_task.status_code == 200
     assert fetched_task.json() == task
+
+    replaced_task = client.put(
+        f"/api/v1/tasks/{task_id}",
+        headers=auth_headers,
+        json={
+            "title": "Replaced task contract",
+            "description": "All replace fields are explicit",
+            "status": "in_progress",
+            "priority": "low",
+            "due_at": "2026-09-01T12:00:00Z",
+        },
+    )
+    assert replaced_task.status_code == 200
+    assert replaced_task.json()["title"] == "Replaced task contract"
+    assert replaced_task.json()["status"] == "in_progress"
 
     updated_task = client.patch(
         f"/api/v1/tasks/{task_id}",
@@ -384,6 +414,18 @@ def test_resources_are_owner_scoped(client: TestClient) -> None:
         status=404,
     )
     assert_error(
+        client.put(
+            f"/api/v1/projects/{project['id']}",
+            headers=second_headers,
+            json={
+                "name": "Stolen Project",
+                "description": "Not the owner",
+                "status": "active",
+            },
+        ),
+        status=404,
+    )
+    assert_error(
         client.patch(
             f"/api/v1/projects/{project['id']}",
             headers=second_headers,
@@ -393,6 +435,20 @@ def test_resources_are_owner_scoped(client: TestClient) -> None:
     )
     assert_error(
         client.get(f"/api/v1/tasks/{task['id']}", headers=second_headers),
+        status=404,
+    )
+    assert_error(
+        client.put(
+            f"/api/v1/tasks/{task['id']}",
+            headers=second_headers,
+            json={
+                "title": "Stolen Task",
+                "description": "Not the owner",
+                "status": "todo",
+                "priority": "medium",
+                "due_at": None,
+            },
+        ),
         status=404,
     )
     assert_error(
@@ -421,6 +477,144 @@ def test_auth_and_validation_errors_use_one_envelope(client: TestClient) -> None
     assert_error(invalid_project, status=422)
 
 
+def test_common_rest_methods_and_cors_preflight_are_available(client: TestClient) -> None:
+    document = client.get("/openapi.json").json()
+    methods = {
+        method.upper()
+        for path, path_item in document["paths"].items()
+        if path == "/health" or path.startswith("/api/v1/")
+        for method in path_item
+        if method.lower() in {"get", "post", "put", "patch", "delete"}
+    }
+    assert methods == {"GET", "POST", "PUT", "PATCH", "DELETE"}
+
+    preflight = client.options(
+        "/api/v1/projects/example",
+        headers={
+            "origin": "https://example.com",
+            "access-control-request-method": "PUT",
+            "access-control-request-headers": "authorization,content-type",
+        },
+    )
+    assert preflight.status_code == 200
+    allowed = preflight.headers["access-control-allow-methods"]
+    for method in ("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"):
+        assert method in allowed
+
+    unsupported = client.request("TRACE", "/api/v1/projects")
+    assert_error(unsupported, status=405, code="http_error")
+
+
+def test_agent_edge_matrix_for_replacement_filters_and_boundaries(client: TestClient) -> None:
+    email, password, _ = register(client, prefix="agent-edges")
+    auth_headers = headers(str(login(client, email, password)["access_token"]))
+
+    active = client.post(
+        "/api/v1/projects",
+        headers=auth_headers,
+        json={"name": "Active Edge Project", "description": "Initial"},
+    ).json()
+    archived = client.post(
+        "/api/v1/projects",
+        headers=auth_headers,
+        json={"name": "Archived Edge Project", "status": "archived"},
+    ).json()
+
+    missing_replace_fields = client.put(
+        f"/api/v1/projects/{active['id']}",
+        headers=auth_headers,
+        json={"name": "Incomplete replacement"},
+    )
+    assert_error(missing_replace_fields, status=422, code="validation_error")
+
+    replaced = client.put(
+        f"/api/v1/projects/{active['id']}",
+        headers=auth_headers,
+        json={
+            "name": "Fully Replaced Project",
+            "description": "PUT replaces the complete writable representation",
+            "status": "active",
+        },
+    )
+    assert replaced.status_code == 200
+    patched = client.patch(
+        f"/api/v1/projects/{active['id']}",
+        headers=auth_headers,
+        json={"name": "Partially Patched Project"},
+    )
+    assert patched.status_code == 200
+    assert patched.json()["description"] == "PUT replaces the complete writable representation"
+
+    filtered = client.get(
+        "/api/v1/projects?status=archived&limit=1&offset=0",
+        headers=auth_headers,
+    )
+    assert filtered.status_code == 200
+    assert filtered.json()["total"] == 1
+    assert filtered.json()["items"][0]["id"] == archived["id"]
+    for query in ("limit=0", "limit=101", "offset=-1", "status=unknown"):
+        assert_error(
+            client.get(f"/api/v1/projects?{query}", headers=auth_headers),
+            status=422,
+            code="validation_error",
+        )
+
+    naive_due_at = client.post(
+        f"/api/v1/projects/{active['id']}/tasks",
+        headers=auth_headers,
+        json={"title": "Naive date", "due_at": "2026-09-01T12:00:00"},
+    )
+    assert_error(naive_due_at, status=422, code="validation_error")
+
+    task = client.post(
+        f"/api/v1/projects/{active['id']}/tasks",
+        headers=auth_headers,
+        json={"title": "Edge Task", "status": "todo", "priority": "high"},
+    ).json()
+    incomplete_task = client.put(
+        f"/api/v1/tasks/{task['id']}",
+        headers=auth_headers,
+        json={"title": "Incomplete"},
+    )
+    assert_error(incomplete_task, status=422, code="validation_error")
+
+    replaced_task = client.put(
+        f"/api/v1/tasks/{task['id']}",
+        headers=auth_headers,
+        json={
+            "title": "Fully Replaced Task",
+            "description": "Complete representation",
+            "status": "in_progress",
+            "priority": "critical",
+            "due_at": "2026-09-01T12:00:00Z",
+        },
+    )
+    assert replaced_task.status_code == 200
+    assert replaced_task.json()["priority"] == "critical"
+
+    cleared_due_at = client.patch(
+        f"/api/v1/tasks/{task['id']}",
+        headers=auth_headers,
+        json={"due_at": None, "status": "done"},
+    )
+    assert cleared_due_at.status_code == 200
+    assert cleared_due_at.json()["due_at"] is None
+
+    invalid_patch_date = client.patch(
+        f"/api/v1/tasks/{task['id']}",
+        headers=auth_headers,
+        json={"due_at": "2026-09-01T12:00:00"},
+    )
+    assert_error(invalid_patch_date, status=422, code="validation_error")
+
+    assert client.delete(f"/api/v1/tasks/{task['id']}", headers=auth_headers).status_code == 204
+    assert_error(
+        client.delete(f"/api/v1/tasks/{task['id']}", headers=auth_headers),
+        status=404,
+        code="task_not_found",
+    )
+
+
 def test_seeded_demo_identity_and_resources_are_read_only_in_demo_mode(
     client: TestClient,
 ) -> None:
@@ -441,6 +635,19 @@ def test_seeded_demo_identity_and_resources_are_read_only_in_demo_mode(
         assert forgot.status_code == 200
         assert forgot.json().get("reset_token") is None
 
+        assert_error(
+            client.put(
+                f"/api/v1/projects/{DEMO_PROJECT_ID}",
+                headers=auth_headers,
+                json={
+                    "name": "Mutated Seed",
+                    "description": "Protected",
+                    "status": "active",
+                },
+            ),
+            status=403,
+            code="demo_resource_immutable",
+        )
         assert_error(
             client.patch(
                 "/api/v1/auth/me",
@@ -486,6 +693,21 @@ def test_seeded_demo_identity_and_resources_are_read_only_in_demo_mode(
             code="demo_resource_immutable",
         )
 
+        assert_error(
+            client.put(
+                f"/api/v1/tasks/{DEMO_TASK_ONE_ID}",
+                headers=auth_headers,
+                json={
+                    "title": "Mutated Seed",
+                    "description": "Protected",
+                    "status": "done",
+                    "priority": "high",
+                    "due_at": None,
+                },
+            ),
+            status=403,
+            code="demo_resource_immutable",
+        )
         assert_error(
             client.patch(
                 f"/api/v1/projects/{DEMO_PROJECT_ID}",
