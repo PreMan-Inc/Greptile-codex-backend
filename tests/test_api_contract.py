@@ -96,6 +96,13 @@ def test_openapi_contains_exactly_the_22_operation_contract(client: TestClient) 
     assert response.status_code == 200
     document = response.json()
 
+    assert document["servers"] == [
+        {
+            "url": ("https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws"),
+            "description": "Stable public demo environment",
+        }
+    ]
+
     operations = {
         (method.upper(), path)
         for path, path_item in document["paths"].items()

@@ -31,6 +31,10 @@ EXPECTED_OPERATIONS = {
 
 def main() -> None:
     document = app.openapi()
+    expected_server = "https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws"
+    actual_servers = document.get("servers") or []
+    if not actual_servers or actual_servers[0].get("url") != expected_server:
+        raise SystemExit(f"OpenAPI must advertise the agent-test backend at {expected_server}")
     actual = {
         (method.upper(), path)
         for path, path_item in document["paths"].items()

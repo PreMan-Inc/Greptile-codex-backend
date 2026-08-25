@@ -41,6 +41,12 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    servers=[
+        {
+            "url": settings.public_base_url.rstrip("/"),
+            "description": "Stable public demo environment",
+        }
+    ],
 )
 
 app.add_middleware(

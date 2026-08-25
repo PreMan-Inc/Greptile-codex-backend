@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     demo_user_password: str = Field(default="PremanDemo123!", min_length=8)
     expose_demo_tokens: bool = True
     cors_origins: str = "*"
+    public_base_url: str = "https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws"
 
     @property
     def allowed_origins(self) -> list[str]:
