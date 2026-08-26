@@ -1568,6 +1568,18 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
       });
     }
 
+    function restoreSeedExamples() {
+      resources.forEach(resource => {
+        setResourceId(resource.key, resource.seedId, null);
+        operations.filter(operation => operation.bodyKey).forEach(operation => {
+          const card = cards.get(cardKey(resource.key, operation.key));
+          if (card?.editor) {
+            card.editor.value = prettyJson(resource.examples[operation.bodyKey]);
+          }
+        });
+      });
+    }
+
     async function runLifecycle() {
       if (lifecycleRunning) return;
       lifecycleRunning = true;
@@ -1627,8 +1639,12 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
           await runStep(resource, "delete", { id: refs[resource.key] });
         }
 
+        restoreSeedExamples();
         setRunnerStatus(`All 30 operations passed · run ${nonce}`, "success");
-        showToast("All 30 CRUD operations completed successfully.", "success");
+        showToast(
+          "All 30 CRUD operations passed. Request cards were restored to valid seed examples.",
+          "success"
+        );
       } catch (error) {
         setRunnerStatus(`Stopped at operation ${step} · ${error.message}`, "danger");
         showToast(`Lifecycle stopped: ${error.message}`, "danger");
@@ -1662,7 +1678,7 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
       resetOutput.textContent = `${Math.round(result.elapsed)} ms\n${formatOutput(result)}`;
 
       if (result.ok) {
-        resources.forEach(resource => setResourceId(resource.key, resource.seedId, null));
+        restoreSeedExamples();
         showToast("Mock data restored from the JSON seed.", "success");
       } else {
         showToast("Mock data reset failed. Inspect the response for details.", "danger");

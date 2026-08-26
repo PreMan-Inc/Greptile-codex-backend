@@ -437,6 +437,7 @@ def test_browser_test_ui_exposes_every_mock_resource(client: TestClient) -> None
     assert "/mock-openapi.json" in html
     assert "/mock-schemas.json" in html
     assert RESET_PATH in html
+    assert "restored to valid seed examples" in html
     for resource in RESOURCE_NAMES:
         assert resource in html
         assert f"{MOCK_PREFIX}/{resource}" in html
