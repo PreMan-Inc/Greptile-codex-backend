@@ -1571,11 +1571,16 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
     function restoreSeedExamples() {
       resources.forEach(resource => {
         setResourceId(resource.key, resource.seedId, null);
-        operations.filter(operation => operation.bodyKey).forEach(operation => {
+        operations.forEach(operation => {
           const card = cards.get(cardKey(resource.key, operation.key));
-          if (card?.editor) {
+          if (!card) return;
+          if (operation.bodyKey && card.editor) {
             card.editor.value = prettyJson(resource.examples[operation.bodyKey]);
           }
+          card.status.textContent = "Not run";
+          card.status.dataset.tone = "";
+          card.timing.textContent = "—";
+          card.output.textContent = "Response output will appear here.";
         });
       });
     }
