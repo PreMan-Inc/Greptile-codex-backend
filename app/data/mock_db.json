@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "updated_at": "2026-08-26T12:00:00Z"
+  },
+  "customers": [
+    {
+      "id": "cus_seed_001",
+      "name": "Avery Chen",
+      "email": "avery.chen@example.com",
+      "phone": "+1-415-555-0101",
+      "company": "Northstar Labs",
+      "status": "active",
+      "created_at": "2026-08-01T09:00:00Z",
+      "updated_at": "2026-08-01T09:00:00Z"
+    },
+    {
+      "id": "cus_seed_002",
+      "name": "Morgan Rivera",
+      "email": "morgan.rivera@example.com",
+      "phone": "+1-212-555-0102",
+      "company": "Rivera Design Co.",
+      "status": "lead",
+      "created_at": "2026-08-03T10:30:00Z",
+      "updated_at": "2026-08-03T10:30:00Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "prd_seed_001",
+      "sku": "KB-100",
+      "name": "Wireless Keyboard",
+      "description": "Compact mechanical keyboard with Bluetooth and USB-C.",
+      "category": "Accessories",
+      "price_cents": 7999,
+      "stock_quantity": 42,
+      "active": true,
+      "created_at": "2026-08-02T08:00:00Z",
+      "updated_at": "2026-08-02T08:00:00Z"
+    },
+    {
+      "id": "prd_seed_002",
+      "sku": "MON-240",
+      "name": "24-inch Monitor",
+      "description": "IPS display with a height-adjustable stand.",
+      "category": "Displays",
+      "price_cents": 24900,
+      "stock_quantity": 18,
+      "active": true,
+      "created_at": "2026-08-02T08:15:00Z",
+      "updated_at": "2026-08-02T08:15:00Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_seed_001",
+      "customer_id": "cus_seed_001",
+      "items": [
+        {
+          "product_id": "prd_seed_001",
+          "quantity": 2
+        }
+      ],
+      "status": "paid",
+      "shipping_address": "100 Market Street, San Francisco, CA 94105",
+      "notes": "Leave with reception.",
+      "total_cents": 15998,
+      "created_at": "2026-08-10T14:00:00Z",
+      "updated_at": "2026-08-10T14:05:00Z"
+    },
+    {
+      "id": "ord_seed_002",
+      "customer_id": "cus_seed_002",
+      "items": [
+        {
+          "product_id": "prd_seed_002",
+          "quantity": 1
+        }
+      ],
+      "status": "shipped",
+      "shipping_address": "52 Broadway, New York, NY 10004",
+      "notes": "Signature required.",
+      "total_cents": 24900,
+      "created_at": "2026-08-12T11:20:00Z",
+      "updated_at": "2026-08-13T16:45:00Z"
+    }
+  ],
+  "tickets": [
+    {
+      "id": "tkt_seed_001",
+      "customer_id": "cus_seed_001",
+      "subject": "Keyboard pairing question",
+      "description": "The keyboard does not appear in the Bluetooth device list.",
+      "status": "in_progress",
+      "priority": "medium",
+      "assignee": "Sam Support",
+      "created_at": "2026-08-15T13:10:00Z",
+      "updated_at": "2026-08-15T13:40:00Z"
+    },
+    {
+      "id": "tkt_seed_002",
+      "customer_id": "cus_seed_002",
+      "subject": "Update delivery address",
+      "description": "Please redirect the monitor shipment to the studio entrance.",
+      "status": "resolved",
+      "priority": "high",
+      "assignee": "Taylor Agent",
+      "created_at": "2026-08-13T09:30:00Z",
+      "updated_at": "2026-08-13T10:15:00Z"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev_seed_001",
+      "customer_id": "cus_seed_001",
+      "product_id": "prd_seed_001",
+      "rating": 5,
+      "title": "Excellent daily keyboard",
+      "body": "Solid build, pleasant switches, and quick device switching.",
+      "created_at": "2026-08-20T17:00:00Z",
+      "updated_at": "2026-08-20T17:00:00Z"
+    },
+    {
+      "id": "rev_seed_002",
+      "customer_id": "cus_seed_002",
+      "product_id": "prd_seed_002",
+      "rating": 4,
+      "title": "Sharp display",
+      "body": "Great colors and stand adjustment; the menu buttons are small.",
+      "created_at": "2026-08-22T12:30:00Z",
+      "updated_at": "2026-08-22T12:30:00Z"
+    }
+  ]
+}

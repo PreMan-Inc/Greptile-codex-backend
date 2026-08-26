@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Always-on hackathon demo API using Lambda and DynamoDB.
+Description: Always-on demo API using Lambda, DynamoDB, and a persistent S3 JSON mock store.
 
 Parameters:
   CodeBucket:
@@ -55,6 +55,37 @@ Resources:
         - Key: environment
           Value: hackathon-demo
 
+  MockJsonData:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldMockJsonVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 7
+      Tags:
+        - Key: application
+          Value: greptile-codex-backend
+        - Key: environment
+          Value: hackathon-demo
+        - Key: purpose
+          Value: json-mock-data
+
   ApiRole:
     Type: AWS::IAM::Role
     Properties:
@@ -82,6 +113,19 @@ Resources:
                   - dynamodb:Scan
                   - dynamodb:UpdateItem
                 Resource: !GetAtt DemoData.Arn
+        - PolicyName: MockJsonDataAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub "${MockJsonData.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !GetAtt MockJsonData.Arn
 
   ApiFunction:
     Type: AWS::Lambda::Function
@@ -101,6 +145,9 @@ Resources:
           APP_ENV: demo
           STORAGE_BACKEND: dynamodb
           TABLE_NAME: !Ref DemoData
+          MOCK_STORAGE_BACKEND: s3
+          MOCK_DATA_BUCKET: !Ref MockJsonData
+          MOCK_DATA_KEY: mock_db.json
           JWT_SECRET: !Sub "{{resolve:secretsmanager:${JwtSigningSecret}:SecretString:jwt_secret}}"
           DEMO_USER_PASSWORD: !Ref DemoPassword
       Tags:
@@ -139,6 +186,9 @@ Outputs:
   TableName:
     Description: DynamoDB table used by the demo API.
     Value: !Ref DemoData
+  MockDataBucket:
+    Description: Private versioned bucket containing the mutable mock_db.json document.
+    Value: !Ref MockJsonData
   FunctionName:
     Description: Lambda function name.
     Value: !Ref ApiFunction

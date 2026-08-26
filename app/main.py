@@ -7,17 +7,32 @@ from datetime import UTC, datetime
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import HTMLResponse, JSONResponse
 from mangum import Mangum
 
 from app.config import get_settings
 from app.errors import install_error_handlers
+from app.mock_store import create_mock_store
+from app.mock_ui import mock_test_ui
 from app.repositories import create_repository
-from app.routers import auth, projects, tasks
+from app.routers import auth, mock, projects, tasks
 from app.schemas import HealthResponse
 from app.seed import seed_demo_data
 
 settings = get_settings()
 repository = create_repository(settings)
+mock_store = create_mock_store(settings)
+
+MOCK_OPENAPI_TAGS = [
+    {
+        "name": f"Mock {resource.title()}",
+        "description": (
+            f"Six complete JSON-backed CRUD operations for the {resource} mock resource."
+        ),
+    }
+    for resource in ("customers", "products", "orders", "tickets", "reviews")
+]
 
 
 @asynccontextmanager
@@ -25,18 +40,19 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     repository.initialize()
     seed_demo_data(repository, settings)
     application.state.repository = repository
+    application.state.mock_store = mock_store
     application.state.settings = settings
     yield
 
 
 app = FastAPI(
     title=settings.app_name,
-    summary="A production-shaped API that PreMan can discover and test on every push.",
+    summary="A production-shaped API plus a complete JSON-backed mock CRUD catalog.",
     description=(
-        "A deterministic hackathon backend with authentication, projects, tasks, "
-        "OpenAPI documentation, and stable demo data."
+        "The original authenticated demo API and 30 clearly labeled mock CRUD operations "
+        "for customers, products, orders, tickets, and reviews."
     ),
-    version="1.1.0",
+    version="2.0.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -47,7 +63,29 @@ app = FastAPI(
             "description": "Stable public demo environment",
         }
     ],
+    openapi_tags=MOCK_OPENAPI_TAGS,
 )
+
+mock_openapi_app = FastAPI(
+    title="PreMan JSON Mock CRUD API",
+    summary="Exactly 30 JSON-backed REST CRUD operations for automated and manual testing.",
+    description=(
+        "Five mock resources with list, create, retrieve, replace, update, and delete "
+        "operations. The reset utility and operational routes are intentionally excluded."
+    ),
+    version="2.0.0",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+    servers=[
+        {
+            "url": settings.public_base_url.rstrip("/"),
+            "description": "Stable public mock environment",
+        }
+    ],
+    openapi_tags=MOCK_OPENAPI_TAGS,
+)
+mock_openapi_app.include_router(mock.router, prefix=settings.api_prefix)
 
 app.add_middleware(
     CORSMiddleware,
@@ -75,18 +113,25 @@ install_error_handlers(app)
 def root() -> dict[str, str]:
     return {
         "name": settings.app_name,
-        "version": "1.1.0",
+        "version": "2.0.0",
         "status": "online",
         "health": "/health",
         "documentation": "/docs",
         "openapi": "/openapi.json",
+        "mock_test_ui": "/test-ui",
+        "mock_documentation": "/mock-docs",
+        "mock_openapi": "/mock-openapi.json",
     }
 
 
 @app.get("/ready", tags=["System"], include_in_schema=False)
 def readiness() -> dict[str, str]:
     # Startup completes only after the repository initializes and demo data is seeded.
-    return {"status": "ready", "storage": settings.storage_backend}
+    return {
+        "status": "ready",
+        "storage": settings.storage_backend,
+        "mock_storage": mock_store.storage_label,
+    }
 
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
@@ -96,14 +141,31 @@ def health() -> HealthResponse:
         service=settings.app_name,
         environment=settings.app_env,
         storage=settings.storage_backend,
-        version="1.1.0",
+        version="2.0.0",
         timestamp=datetime.now(UTC),
     )
+
+
+@app.get("/mock-openapi.json", include_in_schema=False)
+def mock_openapi() -> JSONResponse:
+    return JSONResponse(mock_openapi_app.openapi())
+
+
+@app.get("/mock-docs", include_in_schema=False, response_class=HTMLResponse)
+def mock_docs() -> HTMLResponse:
+    return get_swagger_ui_html(
+        openapi_url="/mock-openapi.json",
+        title="PreMan JSON Mock CRUD API — Swagger UI",
+    )
+
+
+app.get("/test-ui", include_in_schema=False)(mock_test_ui)
 
 
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(projects.router, prefix=settings.api_prefix)
 app.include_router(tasks.router, prefix=settings.api_prefix)
+app.include_router(mock.router, prefix=settings.api_prefix)
 
 # AWS Lambda entry point: app.main.handler
 handler = Mangum(app, lifespan="auto")

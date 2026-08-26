@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail CI when the public demo contract drifts from its 22 operations."""
+"""Fail CI when the preserved legacy contract drifts from its 22 operations."""
 
 from app.main import app
 
@@ -38,7 +38,8 @@ def main() -> None:
     actual = {
         (method.upper(), path)
         for path, path_item in document["paths"].items()
-        if path == "/health" or path.startswith("/api/v1/")
+        if path == "/health"
+        or (path.startswith("/api/v1/") and not path.startswith("/api/v1/mock/"))
         for method in path_item
         if method.lower() in {"get", "post", "put", "patch", "delete"}
     }
@@ -46,10 +47,10 @@ def main() -> None:
         missing = sorted(EXPECTED_OPERATIONS - actual)
         unexpected = sorted(actual - EXPECTED_OPERATIONS)
         raise SystemExit(
-            "API contract drifted from 22 operations. "
+            "Legacy API contract drifted from 22 operations. "
             f"Missing: {missing or 'none'}; unexpected: {unexpected or 'none'}"
         )
-    print("PASS: OpenAPI exposes the exact 22-operation hackathon contract")
+    print("PASS: OpenAPI exposes the exact preserved 22-operation legacy contract")
 
 
 if __name__ == "__main__":

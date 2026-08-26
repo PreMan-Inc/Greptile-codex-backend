@@ -7,7 +7,6 @@ DEMO_PASSWORD="${DEMO_PASSWORD:-PremanDemo123!}"
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 ARTIFACT_BUCKET="${ARTIFACT_BUCKET:-preman-deployments-${ACCOUNT_ID}-${AWS_REGION}}"
-ARTIFACT_KEY="greptile-codex-backend/${GITHUB_SHA:-$(git rev-parse --short HEAD)}/function.zip"
 
 mkdir -p build/lambda
 rm -rf build/lambda/* build/function.zip
@@ -32,6 +31,9 @@ cp -R app build/lambda/app
   cd build/lambda
   zip -qr ../function.zip .
 )
+
+ARTIFACT_DIGEST="$(git hash-object build/function.zip)"
+ARTIFACT_KEY="greptile-codex-backend/${GITHUB_SHA:-$(git rev-parse --short HEAD)}-${ARTIFACT_DIGEST:0:12}/function.zip"
 
 if ! aws s3api head-bucket --bucket "${ARTIFACT_BUCKET}" 2>/dev/null; then
   aws s3api create-bucket --bucket "${ARTIFACT_BUCKET}" --region "${AWS_REGION}"

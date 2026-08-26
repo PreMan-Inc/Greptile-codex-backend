@@ -106,7 +106,8 @@ def test_openapi_contains_exactly_the_22_operation_contract(client: TestClient) 
     operations = {
         (method.upper(), path)
         for path, path_item in document["paths"].items()
-        if path == "/health" or path.startswith("/api/v1/")
+        if path == "/health"
+        or (path.startswith("/api/v1/") and not path.startswith("/api/v1/mock/"))
         for method in path_item
         if method.lower() in {"get", "post", "put", "patch", "delete"}
     }

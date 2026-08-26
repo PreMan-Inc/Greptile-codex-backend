@@ -22,6 +22,14 @@ class Settings(BaseSettings):
     table_name: str = "preman-demo-api"
     aws_region: str = "us-west-2"
 
+    # The mock catalog is always backed by one JSON document. Local development
+    # uses an atomic file; the hosted Lambda stores the same document in S3 so
+    # mutations survive cold starts.
+    mock_storage_backend: Literal["file", "s3"] = "file"
+    mock_data_file: str = ".mock-data/mock_db.json"
+    mock_data_bucket: str = ""
+    mock_data_key: str = "mock_db.json"
+
     jwt_secret: str = Field(
         default="preman-hackathon-development-secret-change-me",
         min_length=32,

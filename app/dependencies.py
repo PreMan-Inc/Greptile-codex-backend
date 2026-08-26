@@ -6,6 +6,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.config import Settings
 from app.domain import UserRecord
 from app.errors import AppError
+from app.mock_store import JsonMockStore
 from app.repositories.base import Repository
 from app.security import decode_token
 
@@ -18,6 +19,12 @@ def get_repository(request: Request) -> Repository:
 
 def get_runtime_settings(request: Request) -> Settings:
     return request.app.state.settings
+
+
+def get_mock_store(request: Request) -> JsonMockStore:
+    mock_store: JsonMockStore = request.app.state.mock_store
+    mock_store.initialize()
+    return mock_store
 
 
 def get_current_user(
