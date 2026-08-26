@@ -764,6 +764,7 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
         <span class="hero-badge">5 resources</span>
         <span class="hero-badge">No client dependencies</span>
         <a class="hero-badge" href="/mock-openapi.json">View mock OpenAPI JSON ↗</a>
+        <a class="hero-badge" href="/mock-schemas.json">View test schemas + fixtures ↗</a>
       </div>
     </div>
   </header>

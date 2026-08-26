@@ -13,6 +13,7 @@ from mangum import Mangum
 
 from app.config import get_settings
 from app.errors import install_error_handlers
+from app.mock_schema_catalog import load_mock_schema_catalog
 from app.mock_store import create_mock_store
 from app.mock_ui import mock_test_ui
 from app.repositories import create_repository
@@ -121,6 +122,7 @@ def root() -> dict[str, str]:
         "mock_test_ui": "/test-ui",
         "mock_documentation": "/mock-docs",
         "mock_openapi": "/mock-openapi.json",
+        "mock_schemas": "/mock-schemas.json",
     }
 
 
@@ -149,6 +151,11 @@ def health() -> HealthResponse:
 @app.get("/mock-openapi.json", include_in_schema=False)
 def mock_openapi() -> JSONResponse:
     return JSONResponse(mock_openapi_app.openapi())
+
+
+@app.get("/mock-schemas.json", include_in_schema=False)
+def mock_schemas() -> JSONResponse:
+    return JSONResponse(load_mock_schema_catalog())
 
 
 @app.get("/mock-docs", include_in_schema=False, response_class=HTMLResponse)

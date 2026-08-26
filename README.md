@@ -25,6 +25,7 @@ The stable public base URL is:
 | Mock test UI | [Open test UI](https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/test-ui) | `http://127.0.0.1:8000/test-ui` |
 | Mock-only Swagger UI | [Open mock Swagger](https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/mock-docs) | `http://127.0.0.1:8000/mock-docs` |
 | Mock-only OpenAPI JSON | [View mock specification](https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/mock-openapi.json) | `http://127.0.0.1:8000/mock-openapi.json` |
+| Test schemas + fixtures | [View reusable JSON schemas](https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/mock-schemas.json) | `http://127.0.0.1:8000/mock-schemas.json` |
 | Combined Swagger UI | [Open combined Swagger](https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/docs) | `http://127.0.0.1:8000/docs` |
 | Combined OpenAPI JSON | [View combined specification](https://xixoo2yundjxsbdwl3iw2eg5hi0ckwfu.lambda-url.us-east-1.on.aws/openapi.json) | `http://127.0.0.1:8000/openapi.json` |
 | Legacy demo email | `demo@preman.live` | `demo@preman.live` |
@@ -140,6 +141,17 @@ The deterministic source dataset is
 [`app/data/mock_db.json`](app/data/mock_db.json). It contains a metadata object plus the
 five top-level resource arrays: `customers`, `products`, `orders`, `tickets`, and
 `reviews`.
+
+Reusable request/response schemas and valid test bodies are committed in
+[`app/data/mock_api_schemas.json`](app/data/mock_api_schemas.json). The file contains
+JSON Schema definitions plus method, path, expected status, request example, and response
+example entries for every mock CRUD operation. It is available from the hosted service at
+`GET /mock-schemas.json`. Regenerate it after changing a Pydantic mock model or seed fixture:
+
+```bash
+uv run python scripts/export_mock_schemas.py
+uv run python scripts/export_mock_schemas.py --check
+```
 
 The committed file is a seed, not a file that production requests rewrite:
 

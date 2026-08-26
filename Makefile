@@ -19,6 +19,7 @@ test:
 contract:
 	$(BIN)/python scripts/check_contract.py
 	$(BIN)/python scripts/export_openapi.py --check
+	$(BIN)/python scripts/export_mock_schemas.py --check
 
 smoke:
 	BASE_URL=$(BASE_URL) $(BIN)/python scripts/live_smoke.py

@@ -11,10 +11,20 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.mock_schema_catalog import (
+    MOCK_SCHEMA_CATALOG_PATH,
+    RESOURCE_MODELS,
+    build_mock_schema_catalog,
+)
 
 MOCK_PREFIX = "/api/v1/mock"
 RESET_PATH = f"{MOCK_PREFIX}/reset"
 SEED_PATH = Path(__file__).resolve().parents[1] / "app" / "data" / "mock_db.json"
+SCHEMA_CATALOG = json.loads(MOCK_SCHEMA_CATALOG_PATH.read_text())
+
+
+def schema_example(resource: str, operation: str) -> dict[str, Any]:
+    return SCHEMA_CATALOG["resources"][resource]["operations"][operation]["request_example"]
 
 
 @dataclass(frozen=True)
@@ -34,21 +44,9 @@ class ResourceCase:
 RESOURCE_CASES = (
     ResourceCase(
         resource="customers",
-        create={
-            "name": "API Test Customer",
-            "email": "api-test-customer@example.com",
-            "phone": "+1-555-0199",
-            "company": "Contract Test Labs",
-            "status": "active",
-        },
-        replace={
-            "name": "Replacement Customer",
-            "email": "replacement-customer@example.com",
-            "phone": "+1-555-0188",
-            "company": "Replacement Test Labs",
-            "status": "inactive",
-        },
-        patch={"name": "Patched Customer"},
+        create=schema_example("customers", "create"),
+        replace=schema_example("customers", "replace"),
+        patch=schema_example("customers", "patch"),
         stable_field="email",
         invalid={
             "name": "Invalid Customer",
@@ -60,25 +58,9 @@ RESOURCE_CASES = (
     ),
     ResourceCase(
         resource="products",
-        create={
-            "name": "API Test Product",
-            "sku": "API-TEST-001",
-            "description": "Disposable product created by the API contract test",
-            "category": "Testing",
-            "price_cents": 1999,
-            "stock_quantity": 12,
-            "active": True,
-        },
-        replace={
-            "name": "Replacement Product",
-            "sku": "API-TEST-002",
-            "description": "Complete product replacement",
-            "category": "Replacement",
-            "price_cents": 2950,
-            "stock_quantity": 7,
-            "active": False,
-        },
-        patch={"price_cents": 2475},
+        create=schema_example("products", "create"),
+        replace=schema_example("products", "replace"),
+        patch=schema_example("products", "patch"),
         stable_field="sku",
         invalid={
             "name": "Invalid Product",
@@ -92,21 +74,9 @@ RESOURCE_CASES = (
     ),
     ResourceCase(
         resource="orders",
-        create={
-            "customer_id": "cus_seed_001",
-            "items": [{"product_id": "prd_seed_001", "quantity": 2}],
-            "status": "pending",
-            "shipping_address": "100 Contract Test Way, Test City, CA 90001",
-            "notes": "Disposable order created by the API contract test",
-        },
-        replace={
-            "customer_id": "cus_seed_002",
-            "items": [{"product_id": "prd_seed_002", "quantity": 4}],
-            "status": "paid",
-            "shipping_address": "200 Replacement Avenue, Test City, CA 90002",
-            "notes": "Complete order replacement",
-        },
-        patch={"status": "shipped"},
+        create=schema_example("orders", "create"),
+        replace=schema_example("orders", "replace"),
+        patch=schema_example("orders", "patch"),
         stable_field="customer_id",
         invalid={
             "customer_id": "cus_seed_001",
@@ -118,23 +88,9 @@ RESOURCE_CASES = (
     ),
     ResourceCase(
         resource="tickets",
-        create={
-            "customer_id": "cus_seed_001",
-            "subject": "API contract test ticket",
-            "description": "Disposable support request",
-            "priority": "high",
-            "status": "open",
-            "assignee": "Contract Test Agent",
-        },
-        replace={
-            "customer_id": "cus_seed_002",
-            "subject": "Replacement support ticket",
-            "description": "Complete ticket replacement",
-            "priority": "low",
-            "status": "in_progress",
-            "assignee": "Replacement Test Agent",
-        },
-        patch={"status": "resolved"},
+        create=schema_example("tickets", "create"),
+        replace=schema_example("tickets", "replace"),
+        patch=schema_example("tickets", "patch"),
         stable_field="subject",
         invalid={
             "customer_id": "cus_seed_001",
@@ -147,21 +103,9 @@ RESOURCE_CASES = (
     ),
     ResourceCase(
         resource="reviews",
-        create={
-            "customer_id": "cus_seed_001",
-            "product_id": "prd_seed_001",
-            "rating": 4,
-            "title": "Contract test review",
-            "body": "Created by the API contract test",
-        },
-        replace={
-            "customer_id": "cus_seed_002",
-            "product_id": "prd_seed_002",
-            "rating": 3,
-            "title": "Replacement test review",
-            "body": "Complete review replacement",
-        },
-        patch={"rating": 5},
+        create=schema_example("reviews", "create"),
+        replace=schema_example("reviews", "replace"),
+        patch=schema_example("reviews", "patch"),
         stable_field="body",
         invalid={
             "customer_id": "cus_seed_001",
@@ -249,6 +193,26 @@ def test_mock_seed_is_a_well_formed_json_database() -> None:
         assert len(ids) == len(set(ids)), f"{case.resource} seed IDs must be unique"
         for record in records:
             assert set(case.create) <= record.keys()
+
+
+def test_mock_schema_catalog_is_current_and_examples_validate() -> None:
+    assert MOCK_SCHEMA_CATALOG_PATH.is_file()
+    assert SCHEMA_CATALOG == build_mock_schema_catalog()
+    assert set(SCHEMA_CATALOG["resources"]) == set(RESOURCE_NAMES)
+
+    for resource, models in RESOURCE_MODELS.items():
+        operations = SCHEMA_CATALOG["resources"][resource]["operations"]
+        assert set(operations) == {"list", "create", "get", "replace", "patch", "delete"}
+        for purpose in ("create", "replace", "patch"):
+            example = operations[purpose]["request_example"]
+            validated = models[purpose].model_validate(example)
+            assert validated.model_dump(mode="json", exclude_unset=True) == example
+
+
+def test_mock_schema_catalog_is_downloadable(client: TestClient) -> None:
+    response = client.get("/mock-schemas.json")
+    assert response.status_code == 200, response.text
+    assert response.json() == SCHEMA_CATALOG
 
 
 def test_reset_restores_every_collection_from_the_json_seed(client: TestClient) -> None:
@@ -471,6 +435,7 @@ def test_browser_test_ui_exposes_every_mock_resource(client: TestClient) -> None
     html = response.text.lower()
 
     assert "/mock-openapi.json" in html
+    assert "/mock-schemas.json" in html
     assert RESET_PATH in html
     for resource in RESOURCE_NAMES:
         assert resource in html

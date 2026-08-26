@@ -32,6 +32,7 @@ def main() -> None:
     ready = get_json("/ready")
     document = get_json("/openapi.json")
     mock_document = get_json("/mock-openapi.json")
+    mock_schemas = get_json("/mock-schemas.json")
     mock_customers = get_json("/api/v1/mock/customers?limit=1")
     test_ui = get_text("/test-ui")
     paths = document.get("paths", {})
@@ -55,13 +56,21 @@ def main() -> None:
         raise RuntimeError(f"Expected 22 legacy operations, found {len(operations)}")
     if len(mock_operations) != 30:
         raise RuntimeError(f"Expected 30 mock operations, found {len(mock_operations)}")
+    if set(mock_schemas.get("resources", {})) != {
+        "customers",
+        "products",
+        "orders",
+        "tickets",
+        "reviews",
+    }:
+        raise RuntimeError("The hosted mock schema fixture catalog is unavailable or malformed")
     if not isinstance(mock_customers.get("items"), list):
         raise TypeError("The hosted JSON mock store is unavailable or malformed")
     if "Mock API Workbench" not in test_ui:
         raise RuntimeError("The browser test UI is unavailable or malformed")
     print(
         f"PASS: {BASE_URL} is healthy and exposes 22 legacy + 30 mock operations "
-        "with the browser test UI"
+        "with the browser test UI and reusable schema fixtures"
     )
 
 

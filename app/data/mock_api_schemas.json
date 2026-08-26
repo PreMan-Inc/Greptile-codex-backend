@@ -1,0 +1,2045 @@
+{
+  "$defs": {
+    "CustomerCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "default": "",
+          "examples": [
+            "Northstar Labs"
+          ],
+          "maxLength": 120,
+          "title": "Company",
+          "type": "string"
+        },
+        "email": {
+          "examples": [
+            "jordan.lee@example.com"
+          ],
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "name": {
+          "examples": [
+            "Jordan Lee"
+          ],
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "phone": {
+          "default": "",
+          "examples": [
+            "+1-555-0199"
+          ],
+          "maxLength": 30,
+          "title": "Phone",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CustomerStatus",
+          "default": "active"
+        }
+      },
+      "required": [
+        "name",
+        "email"
+      ],
+      "title": "CustomerCreate",
+      "type": "object"
+    },
+    "CustomerPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/CustomerResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "limit",
+        "offset"
+      ],
+      "title": "MockPage[CustomerResponse]",
+      "type": "object"
+    },
+    "CustomerPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "default": null,
+          "maxLength": 120,
+          "title": "Company",
+          "type": "string"
+        },
+        "email": {
+          "default": null,
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "name": {
+          "default": null,
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "phone": {
+          "default": null,
+          "maxLength": 30,
+          "title": "Phone",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CustomerStatus",
+          "default": null
+        }
+      },
+      "title": "CustomerUpdate",
+      "type": "object"
+    },
+    "CustomerReplace": {
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "maxLength": 120,
+          "title": "Company",
+          "type": "string"
+        },
+        "email": {
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "phone": {
+          "maxLength": 30,
+          "title": "Phone",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CustomerStatus"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "phone",
+        "company",
+        "status"
+      ],
+      "title": "CustomerReplace",
+      "type": "object"
+    },
+    "CustomerResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "company": {
+          "default": "",
+          "examples": [
+            "Northstar Labs"
+          ],
+          "maxLength": 120,
+          "title": "Company",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "email": {
+          "examples": [
+            "jordan.lee@example.com"
+          ],
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "examples": [
+            "Jordan Lee"
+          ],
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "phone": {
+          "default": "",
+          "examples": [
+            "+1-555-0199"
+          ],
+          "maxLength": 30,
+          "title": "Phone",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CustomerStatus",
+          "default": "active"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "CustomerResponse",
+      "type": "object"
+    },
+    "CustomerStatus": {
+      "enum": [
+        "active",
+        "inactive",
+        "lead"
+      ],
+      "title": "CustomerStatus",
+      "type": "string"
+    },
+    "OrderCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/OrderItem"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "notes": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Notes",
+          "type": "string"
+        },
+        "shipping_address": {
+          "maxLength": 500,
+          "minLength": 5,
+          "title": "Shipping Address",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/OrderStatus",
+          "default": "pending"
+        }
+      },
+      "required": [
+        "customer_id",
+        "items",
+        "shipping_address"
+      ],
+      "title": "OrderCreate",
+      "type": "object"
+    },
+    "OrderItem": {
+      "additionalProperties": false,
+      "properties": {
+        "product_id": {
+          "minLength": 1,
+          "title": "Product Id",
+          "type": "string"
+        },
+        "quantity": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Quantity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "product_id",
+        "quantity"
+      ],
+      "title": "OrderItem",
+      "type": "object"
+    },
+    "OrderPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/OrderResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "limit",
+        "offset"
+      ],
+      "title": "MockPage[OrderResponse]",
+      "type": "object"
+    },
+    "OrderPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "customer_id": {
+          "default": null,
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "items": {
+          "default": null,
+          "items": {
+            "$ref": "#/$defs/OrderItem"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "notes": {
+          "default": null,
+          "maxLength": 1000,
+          "title": "Notes",
+          "type": "string"
+        },
+        "shipping_address": {
+          "default": null,
+          "maxLength": 500,
+          "minLength": 5,
+          "title": "Shipping Address",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/OrderStatus",
+          "default": null
+        }
+      },
+      "title": "OrderUpdate",
+      "type": "object"
+    },
+    "OrderReplace": {
+      "additionalProperties": false,
+      "properties": {
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/OrderItem"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "notes": {
+          "maxLength": 1000,
+          "title": "Notes",
+          "type": "string"
+        },
+        "shipping_address": {
+          "maxLength": 500,
+          "minLength": 5,
+          "title": "Shipping Address",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/OrderStatus"
+        }
+      },
+      "required": [
+        "customer_id",
+        "items",
+        "status",
+        "shipping_address",
+        "notes"
+      ],
+      "title": "OrderReplace",
+      "type": "object"
+    },
+    "OrderResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/OrderItem"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "notes": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Notes",
+          "type": "string"
+        },
+        "shipping_address": {
+          "maxLength": 500,
+          "minLength": 5,
+          "title": "Shipping Address",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/OrderStatus",
+          "default": "pending"
+        },
+        "total_cents": {
+          "minimum": 0,
+          "title": "Total Cents",
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "items",
+        "shipping_address",
+        "id",
+        "created_at",
+        "updated_at",
+        "total_cents"
+      ],
+      "title": "OrderResponse",
+      "type": "object"
+    },
+    "OrderStatus": {
+      "enum": [
+        "pending",
+        "paid",
+        "shipped",
+        "delivered",
+        "cancelled"
+      ],
+      "title": "OrderStatus",
+      "type": "string"
+    },
+    "Priority": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "ProductCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "category": {
+          "default": "General",
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Category",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "name": {
+          "examples": [
+            "Wireless Keyboard"
+          ],
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "price_cents": {
+          "examples": [
+            7999
+          ],
+          "maximum": 100000000,
+          "minimum": 0,
+          "title": "Price Cents",
+          "type": "integer"
+        },
+        "sku": {
+          "examples": [
+            "KB-100"
+          ],
+          "maxLength": 40,
+          "minLength": 2,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Sku",
+          "type": "string"
+        },
+        "stock_quantity": {
+          "default": 0,
+          "maximum": 10000000,
+          "minimum": 0,
+          "title": "Stock Quantity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sku",
+        "name",
+        "price_cents"
+      ],
+      "title": "ProductCreate",
+      "type": "object"
+    },
+    "ProductPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ProductResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "limit",
+        "offset"
+      ],
+      "title": "MockPage[ProductResponse]",
+      "type": "object"
+    },
+    "ProductPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "default": null,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "category": {
+          "default": null,
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Category",
+          "type": "string"
+        },
+        "description": {
+          "default": null,
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "name": {
+          "default": null,
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "price_cents": {
+          "default": null,
+          "maximum": 100000000,
+          "minimum": 0,
+          "title": "Price Cents",
+          "type": "integer"
+        },
+        "sku": {
+          "default": null,
+          "maxLength": 40,
+          "minLength": 2,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Sku",
+          "type": "string"
+        },
+        "stock_quantity": {
+          "default": null,
+          "maximum": 10000000,
+          "minimum": 0,
+          "title": "Stock Quantity",
+          "type": "integer"
+        }
+      },
+      "title": "ProductUpdate",
+      "type": "object"
+    },
+    "ProductReplace": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "category": {
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Category",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "price_cents": {
+          "maximum": 100000000,
+          "minimum": 0,
+          "title": "Price Cents",
+          "type": "integer"
+        },
+        "sku": {
+          "maxLength": 40,
+          "minLength": 2,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Sku",
+          "type": "string"
+        },
+        "stock_quantity": {
+          "maximum": 10000000,
+          "minimum": 0,
+          "title": "Stock Quantity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sku",
+        "name",
+        "description",
+        "category",
+        "price_cents",
+        "stock_quantity",
+        "active"
+      ],
+      "title": "ProductReplace",
+      "type": "object"
+    },
+    "ProductResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "category": {
+          "default": "General",
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Category",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "examples": [
+            "Wireless Keyboard"
+          ],
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "price_cents": {
+          "examples": [
+            7999
+          ],
+          "maximum": 100000000,
+          "minimum": 0,
+          "title": "Price Cents",
+          "type": "integer"
+        },
+        "sku": {
+          "examples": [
+            "KB-100"
+          ],
+          "maxLength": 40,
+          "minLength": 2,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Sku",
+          "type": "string"
+        },
+        "stock_quantity": {
+          "default": 0,
+          "maximum": 10000000,
+          "minimum": 0,
+          "title": "Stock Quantity",
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sku",
+        "name",
+        "price_cents",
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "ProductResponse",
+      "type": "object"
+    },
+    "ReviewCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "maxLength": 2000,
+          "minLength": 2,
+          "title": "Body",
+          "type": "string"
+        },
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "product_id": {
+          "minLength": 1,
+          "title": "Product Id",
+          "type": "string"
+        },
+        "rating": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Rating",
+          "type": "integer"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "product_id",
+        "rating",
+        "title",
+        "body"
+      ],
+      "title": "ReviewCreate",
+      "type": "object"
+    },
+    "ReviewPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ReviewResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "limit",
+        "offset"
+      ],
+      "title": "MockPage[ReviewResponse]",
+      "type": "object"
+    },
+    "ReviewPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "default": null,
+          "maxLength": 2000,
+          "minLength": 2,
+          "title": "Body",
+          "type": "string"
+        },
+        "customer_id": {
+          "default": null,
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "product_id": {
+          "default": null,
+          "minLength": 1,
+          "title": "Product Id",
+          "type": "string"
+        },
+        "rating": {
+          "default": null,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Rating",
+          "type": "integer"
+        },
+        "title": {
+          "default": null,
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "title": "ReviewUpdate",
+      "type": "object"
+    },
+    "ReviewReplace": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "maxLength": 2000,
+          "minLength": 2,
+          "title": "Body",
+          "type": "string"
+        },
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "product_id": {
+          "minLength": 1,
+          "title": "Product Id",
+          "type": "string"
+        },
+        "rating": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Rating",
+          "type": "integer"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "product_id",
+        "rating",
+        "title",
+        "body"
+      ],
+      "title": "ReviewReplace",
+      "type": "object"
+    },
+    "ReviewResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "maxLength": 2000,
+          "minLength": 2,
+          "title": "Body",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "product_id": {
+          "minLength": 1,
+          "title": "Product Id",
+          "type": "string"
+        },
+        "rating": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Rating",
+          "type": "integer"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Title",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "product_id",
+        "rating",
+        "title",
+        "body",
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "ReviewResponse",
+      "type": "object"
+    },
+    "TicketCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "assignee": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Assignee",
+          "type": "string"
+        },
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Description",
+          "type": "string"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": "medium"
+        },
+        "status": {
+          "$ref": "#/$defs/TicketStatus",
+          "default": "open"
+        },
+        "subject": {
+          "maxLength": 160,
+          "minLength": 3,
+          "title": "Subject",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "subject",
+        "description"
+      ],
+      "title": "TicketCreate",
+      "type": "object"
+    },
+    "TicketPage": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/TicketResponse"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "limit",
+        "offset"
+      ],
+      "title": "MockPage[TicketResponse]",
+      "type": "object"
+    },
+    "TicketPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "assignee": {
+          "default": null,
+          "maxLength": 100,
+          "title": "Assignee",
+          "type": "string"
+        },
+        "customer_id": {
+          "default": null,
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "description": {
+          "default": null,
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Description",
+          "type": "string"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": null
+        },
+        "status": {
+          "$ref": "#/$defs/TicketStatus",
+          "default": null
+        },
+        "subject": {
+          "default": null,
+          "maxLength": 160,
+          "minLength": 3,
+          "title": "Subject",
+          "type": "string"
+        }
+      },
+      "title": "TicketUpdate",
+      "type": "object"
+    },
+    "TicketReplace": {
+      "additionalProperties": false,
+      "properties": {
+        "assignee": {
+          "maxLength": 100,
+          "title": "Assignee",
+          "type": "string"
+        },
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Description",
+          "type": "string"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority"
+        },
+        "status": {
+          "$ref": "#/$defs/TicketStatus"
+        },
+        "subject": {
+          "maxLength": 160,
+          "minLength": 3,
+          "title": "Subject",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "subject",
+        "description",
+        "status",
+        "priority",
+        "assignee"
+      ],
+      "title": "TicketReplace",
+      "type": "object"
+    },
+    "TicketResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "assignee": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Assignee",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "customer_id": {
+          "minLength": 1,
+          "title": "Customer Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 3,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": "medium"
+        },
+        "status": {
+          "$ref": "#/$defs/TicketStatus",
+          "default": "open"
+        },
+        "subject": {
+          "maxLength": 160,
+          "minLength": 3,
+          "title": "Subject",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "subject",
+        "description",
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "TicketResponse",
+      "type": "object"
+    },
+    "TicketStatus": {
+      "enum": [
+        "open",
+        "in_progress",
+        "resolved",
+        "closed"
+      ],
+      "title": "TicketStatus",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "base_path": "/api/v1/mock",
+  "description": "Machine-readable JSON Schemas, request fixtures, and response examples for all 30 hosted mock CRUD operations.",
+  "resources": {
+    "customers": {
+      "collection_path": "/api/v1/mock/customers",
+      "description": "Reusable schemas and fixtures for mock customers tests.",
+      "item_path": "/api/v1/mock/customers/{item_id}",
+      "operations": {
+        "create": {
+          "expected_status": 201,
+          "method": "POST",
+          "path": "/api/v1/mock/customers",
+          "request_example": {
+            "company": "Contract Test Labs",
+            "email": "api-test-customer@example.com",
+            "name": "API Test Customer",
+            "phone": "+1-555-0199",
+            "status": "active"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/CustomerCreate"
+          },
+          "response_example": {
+            "company": "Northstar Labs",
+            "created_at": "2026-08-01T09:00:00Z",
+            "email": "avery.chen@example.com",
+            "id": "cus_seed_001",
+            "name": "Avery Chen",
+            "phone": "+1-415-555-0101",
+            "status": "active",
+            "updated_at": "2026-08-01T09:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/CustomerResponse"
+          }
+        },
+        "delete": {
+          "expected_status": 204,
+          "method": "DELETE",
+          "path": "/api/v1/mock/customers/{item_id}",
+          "response_example": null,
+          "response_schema": null
+        },
+        "get": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/customers/{item_id}",
+          "response_example": {
+            "company": "Northstar Labs",
+            "created_at": "2026-08-01T09:00:00Z",
+            "email": "avery.chen@example.com",
+            "id": "cus_seed_001",
+            "name": "Avery Chen",
+            "phone": "+1-415-555-0101",
+            "status": "active",
+            "updated_at": "2026-08-01T09:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/CustomerResponse"
+          }
+        },
+        "list": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/customers",
+          "response_example": {
+            "items": [
+              {
+                "company": "Northstar Labs",
+                "created_at": "2026-08-01T09:00:00Z",
+                "email": "avery.chen@example.com",
+                "id": "cus_seed_001",
+                "name": "Avery Chen",
+                "phone": "+1-415-555-0101",
+                "status": "active",
+                "updated_at": "2026-08-01T09:00:00Z"
+              },
+              {
+                "company": "Rivera Design Co.",
+                "created_at": "2026-08-03T10:30:00Z",
+                "email": "morgan.rivera@example.com",
+                "id": "cus_seed_002",
+                "name": "Morgan Rivera",
+                "phone": "+1-212-555-0102",
+                "status": "lead",
+                "updated_at": "2026-08-03T10:30:00Z"
+              }
+            ],
+            "limit": 20,
+            "offset": 0,
+            "total": 2
+          },
+          "response_schema": {
+            "$ref": "#/$defs/CustomerPage"
+          }
+        },
+        "patch": {
+          "expected_status": 200,
+          "method": "PATCH",
+          "path": "/api/v1/mock/customers/{item_id}",
+          "request_example": {
+            "name": "Patched Customer"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/CustomerPatch"
+          },
+          "response_example": {
+            "company": "Northstar Labs",
+            "created_at": "2026-08-01T09:00:00Z",
+            "email": "avery.chen@example.com",
+            "id": "cus_seed_001",
+            "name": "Avery Chen",
+            "phone": "+1-415-555-0101",
+            "status": "active",
+            "updated_at": "2026-08-01T09:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/CustomerResponse"
+          }
+        },
+        "replace": {
+          "expected_status": 200,
+          "method": "PUT",
+          "path": "/api/v1/mock/customers/{item_id}",
+          "request_example": {
+            "company": "Replacement Test Labs",
+            "email": "replacement-customer@example.com",
+            "name": "Replacement Customer",
+            "phone": "+1-555-0188",
+            "status": "inactive"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/CustomerReplace"
+          },
+          "response_example": {
+            "company": "Northstar Labs",
+            "created_at": "2026-08-01T09:00:00Z",
+            "email": "avery.chen@example.com",
+            "id": "cus_seed_001",
+            "name": "Avery Chen",
+            "phone": "+1-415-555-0101",
+            "status": "active",
+            "updated_at": "2026-08-01T09:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/CustomerResponse"
+          }
+        }
+      }
+    },
+    "orders": {
+      "collection_path": "/api/v1/mock/orders",
+      "description": "Reusable schemas and fixtures for mock orders tests.",
+      "item_path": "/api/v1/mock/orders/{item_id}",
+      "operations": {
+        "create": {
+          "expected_status": 201,
+          "method": "POST",
+          "path": "/api/v1/mock/orders",
+          "request_example": {
+            "customer_id": "cus_seed_001",
+            "items": [
+              {
+                "product_id": "prd_seed_001",
+                "quantity": 2
+              }
+            ],
+            "notes": "Disposable order created by a contract test",
+            "shipping_address": "100 Contract Test Way, Test City, CA 90001",
+            "status": "pending"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/OrderCreate"
+          },
+          "response_example": {
+            "created_at": "2026-08-10T14:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "ord_seed_001",
+            "items": [
+              {
+                "product_id": "prd_seed_001",
+                "quantity": 2
+              }
+            ],
+            "notes": "Leave with reception.",
+            "shipping_address": "100 Market Street, San Francisco, CA 94105",
+            "status": "paid",
+            "total_cents": 15998,
+            "updated_at": "2026-08-10T14:05:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/OrderResponse"
+          }
+        },
+        "delete": {
+          "expected_status": 204,
+          "method": "DELETE",
+          "path": "/api/v1/mock/orders/{item_id}",
+          "response_example": null,
+          "response_schema": null
+        },
+        "get": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/orders/{item_id}",
+          "response_example": {
+            "created_at": "2026-08-10T14:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "ord_seed_001",
+            "items": [
+              {
+                "product_id": "prd_seed_001",
+                "quantity": 2
+              }
+            ],
+            "notes": "Leave with reception.",
+            "shipping_address": "100 Market Street, San Francisco, CA 94105",
+            "status": "paid",
+            "total_cents": 15998,
+            "updated_at": "2026-08-10T14:05:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/OrderResponse"
+          }
+        },
+        "list": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/orders",
+          "response_example": {
+            "items": [
+              {
+                "created_at": "2026-08-10T14:00:00Z",
+                "customer_id": "cus_seed_001",
+                "id": "ord_seed_001",
+                "items": [
+                  {
+                    "product_id": "prd_seed_001",
+                    "quantity": 2
+                  }
+                ],
+                "notes": "Leave with reception.",
+                "shipping_address": "100 Market Street, San Francisco, CA 94105",
+                "status": "paid",
+                "total_cents": 15998,
+                "updated_at": "2026-08-10T14:05:00Z"
+              },
+              {
+                "created_at": "2026-08-12T11:20:00Z",
+                "customer_id": "cus_seed_002",
+                "id": "ord_seed_002",
+                "items": [
+                  {
+                    "product_id": "prd_seed_002",
+                    "quantity": 1
+                  }
+                ],
+                "notes": "Signature required.",
+                "shipping_address": "52 Broadway, New York, NY 10004",
+                "status": "shipped",
+                "total_cents": 24900,
+                "updated_at": "2026-08-13T16:45:00Z"
+              }
+            ],
+            "limit": 20,
+            "offset": 0,
+            "total": 2
+          },
+          "response_schema": {
+            "$ref": "#/$defs/OrderPage"
+          }
+        },
+        "patch": {
+          "expected_status": 200,
+          "method": "PATCH",
+          "path": "/api/v1/mock/orders/{item_id}",
+          "request_example": {
+            "status": "shipped"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/OrderPatch"
+          },
+          "response_example": {
+            "created_at": "2026-08-10T14:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "ord_seed_001",
+            "items": [
+              {
+                "product_id": "prd_seed_001",
+                "quantity": 2
+              }
+            ],
+            "notes": "Leave with reception.",
+            "shipping_address": "100 Market Street, San Francisco, CA 94105",
+            "status": "paid",
+            "total_cents": 15998,
+            "updated_at": "2026-08-10T14:05:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/OrderResponse"
+          }
+        },
+        "replace": {
+          "expected_status": 200,
+          "method": "PUT",
+          "path": "/api/v1/mock/orders/{item_id}",
+          "request_example": {
+            "customer_id": "cus_seed_002",
+            "items": [
+              {
+                "product_id": "prd_seed_002",
+                "quantity": 4
+              }
+            ],
+            "notes": "Complete order replacement",
+            "shipping_address": "200 Replacement Avenue, Test City, CA 90002",
+            "status": "paid"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/OrderReplace"
+          },
+          "response_example": {
+            "created_at": "2026-08-10T14:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "ord_seed_001",
+            "items": [
+              {
+                "product_id": "prd_seed_001",
+                "quantity": 2
+              }
+            ],
+            "notes": "Leave with reception.",
+            "shipping_address": "100 Market Street, San Francisco, CA 94105",
+            "status": "paid",
+            "total_cents": 15998,
+            "updated_at": "2026-08-10T14:05:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/OrderResponse"
+          }
+        }
+      }
+    },
+    "products": {
+      "collection_path": "/api/v1/mock/products",
+      "description": "Reusable schemas and fixtures for mock products tests.",
+      "item_path": "/api/v1/mock/products/{item_id}",
+      "operations": {
+        "create": {
+          "expected_status": 201,
+          "method": "POST",
+          "path": "/api/v1/mock/products",
+          "request_example": {
+            "active": true,
+            "category": "Testing",
+            "description": "Disposable product created by a contract test",
+            "name": "API Test Product",
+            "price_cents": 1999,
+            "sku": "API-TEST-001",
+            "stock_quantity": 12
+          },
+          "request_schema": {
+            "$ref": "#/$defs/ProductCreate"
+          },
+          "response_example": {
+            "active": true,
+            "category": "Accessories",
+            "created_at": "2026-08-02T08:00:00Z",
+            "description": "Compact mechanical keyboard with Bluetooth and USB-C.",
+            "id": "prd_seed_001",
+            "name": "Wireless Keyboard",
+            "price_cents": 7999,
+            "sku": "KB-100",
+            "stock_quantity": 42,
+            "updated_at": "2026-08-02T08:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ProductResponse"
+          }
+        },
+        "delete": {
+          "expected_status": 204,
+          "method": "DELETE",
+          "path": "/api/v1/mock/products/{item_id}",
+          "response_example": null,
+          "response_schema": null
+        },
+        "get": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/products/{item_id}",
+          "response_example": {
+            "active": true,
+            "category": "Accessories",
+            "created_at": "2026-08-02T08:00:00Z",
+            "description": "Compact mechanical keyboard with Bluetooth and USB-C.",
+            "id": "prd_seed_001",
+            "name": "Wireless Keyboard",
+            "price_cents": 7999,
+            "sku": "KB-100",
+            "stock_quantity": 42,
+            "updated_at": "2026-08-02T08:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ProductResponse"
+          }
+        },
+        "list": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/products",
+          "response_example": {
+            "items": [
+              {
+                "active": true,
+                "category": "Accessories",
+                "created_at": "2026-08-02T08:00:00Z",
+                "description": "Compact mechanical keyboard with Bluetooth and USB-C.",
+                "id": "prd_seed_001",
+                "name": "Wireless Keyboard",
+                "price_cents": 7999,
+                "sku": "KB-100",
+                "stock_quantity": 42,
+                "updated_at": "2026-08-02T08:00:00Z"
+              },
+              {
+                "active": true,
+                "category": "Displays",
+                "created_at": "2026-08-02T08:15:00Z",
+                "description": "IPS display with a height-adjustable stand.",
+                "id": "prd_seed_002",
+                "name": "24-inch Monitor",
+                "price_cents": 24900,
+                "sku": "MON-240",
+                "stock_quantity": 18,
+                "updated_at": "2026-08-02T08:15:00Z"
+              }
+            ],
+            "limit": 20,
+            "offset": 0,
+            "total": 2
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ProductPage"
+          }
+        },
+        "patch": {
+          "expected_status": 200,
+          "method": "PATCH",
+          "path": "/api/v1/mock/products/{item_id}",
+          "request_example": {
+            "price_cents": 2475
+          },
+          "request_schema": {
+            "$ref": "#/$defs/ProductPatch"
+          },
+          "response_example": {
+            "active": true,
+            "category": "Accessories",
+            "created_at": "2026-08-02T08:00:00Z",
+            "description": "Compact mechanical keyboard with Bluetooth and USB-C.",
+            "id": "prd_seed_001",
+            "name": "Wireless Keyboard",
+            "price_cents": 7999,
+            "sku": "KB-100",
+            "stock_quantity": 42,
+            "updated_at": "2026-08-02T08:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ProductResponse"
+          }
+        },
+        "replace": {
+          "expected_status": 200,
+          "method": "PUT",
+          "path": "/api/v1/mock/products/{item_id}",
+          "request_example": {
+            "active": false,
+            "category": "Replacement",
+            "description": "Complete product replacement",
+            "name": "Replacement Product",
+            "price_cents": 2950,
+            "sku": "API-TEST-002",
+            "stock_quantity": 7
+          },
+          "request_schema": {
+            "$ref": "#/$defs/ProductReplace"
+          },
+          "response_example": {
+            "active": true,
+            "category": "Accessories",
+            "created_at": "2026-08-02T08:00:00Z",
+            "description": "Compact mechanical keyboard with Bluetooth and USB-C.",
+            "id": "prd_seed_001",
+            "name": "Wireless Keyboard",
+            "price_cents": 7999,
+            "sku": "KB-100",
+            "stock_quantity": 42,
+            "updated_at": "2026-08-02T08:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ProductResponse"
+          }
+        }
+      }
+    },
+    "reviews": {
+      "collection_path": "/api/v1/mock/reviews",
+      "description": "Reusable schemas and fixtures for mock reviews tests.",
+      "item_path": "/api/v1/mock/reviews/{item_id}",
+      "operations": {
+        "create": {
+          "expected_status": 201,
+          "method": "POST",
+          "path": "/api/v1/mock/reviews",
+          "request_example": {
+            "body": "Created by the API contract test",
+            "customer_id": "cus_seed_001",
+            "product_id": "prd_seed_001",
+            "rating": 4,
+            "title": "Contract test review"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/ReviewCreate"
+          },
+          "response_example": {
+            "body": "Solid build, pleasant switches, and quick device switching.",
+            "created_at": "2026-08-20T17:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "rev_seed_001",
+            "product_id": "prd_seed_001",
+            "rating": 5,
+            "title": "Excellent daily keyboard",
+            "updated_at": "2026-08-20T17:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ReviewResponse"
+          }
+        },
+        "delete": {
+          "expected_status": 204,
+          "method": "DELETE",
+          "path": "/api/v1/mock/reviews/{item_id}",
+          "response_example": null,
+          "response_schema": null
+        },
+        "get": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/reviews/{item_id}",
+          "response_example": {
+            "body": "Solid build, pleasant switches, and quick device switching.",
+            "created_at": "2026-08-20T17:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "rev_seed_001",
+            "product_id": "prd_seed_001",
+            "rating": 5,
+            "title": "Excellent daily keyboard",
+            "updated_at": "2026-08-20T17:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ReviewResponse"
+          }
+        },
+        "list": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/reviews",
+          "response_example": {
+            "items": [
+              {
+                "body": "Solid build, pleasant switches, and quick device switching.",
+                "created_at": "2026-08-20T17:00:00Z",
+                "customer_id": "cus_seed_001",
+                "id": "rev_seed_001",
+                "product_id": "prd_seed_001",
+                "rating": 5,
+                "title": "Excellent daily keyboard",
+                "updated_at": "2026-08-20T17:00:00Z"
+              },
+              {
+                "body": "Great colors and stand adjustment; the menu buttons are small.",
+                "created_at": "2026-08-22T12:30:00Z",
+                "customer_id": "cus_seed_002",
+                "id": "rev_seed_002",
+                "product_id": "prd_seed_002",
+                "rating": 4,
+                "title": "Sharp display",
+                "updated_at": "2026-08-22T12:30:00Z"
+              }
+            ],
+            "limit": 20,
+            "offset": 0,
+            "total": 2
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ReviewPage"
+          }
+        },
+        "patch": {
+          "expected_status": 200,
+          "method": "PATCH",
+          "path": "/api/v1/mock/reviews/{item_id}",
+          "request_example": {
+            "rating": 5
+          },
+          "request_schema": {
+            "$ref": "#/$defs/ReviewPatch"
+          },
+          "response_example": {
+            "body": "Solid build, pleasant switches, and quick device switching.",
+            "created_at": "2026-08-20T17:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "rev_seed_001",
+            "product_id": "prd_seed_001",
+            "rating": 5,
+            "title": "Excellent daily keyboard",
+            "updated_at": "2026-08-20T17:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ReviewResponse"
+          }
+        },
+        "replace": {
+          "expected_status": 200,
+          "method": "PUT",
+          "path": "/api/v1/mock/reviews/{item_id}",
+          "request_example": {
+            "body": "Complete review replacement",
+            "customer_id": "cus_seed_002",
+            "product_id": "prd_seed_002",
+            "rating": 3,
+            "title": "Replacement test review"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/ReviewReplace"
+          },
+          "response_example": {
+            "body": "Solid build, pleasant switches, and quick device switching.",
+            "created_at": "2026-08-20T17:00:00Z",
+            "customer_id": "cus_seed_001",
+            "id": "rev_seed_001",
+            "product_id": "prd_seed_001",
+            "rating": 5,
+            "title": "Excellent daily keyboard",
+            "updated_at": "2026-08-20T17:00:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/ReviewResponse"
+          }
+        }
+      }
+    },
+    "tickets": {
+      "collection_path": "/api/v1/mock/tickets",
+      "description": "Reusable schemas and fixtures for mock tickets tests.",
+      "item_path": "/api/v1/mock/tickets/{item_id}",
+      "operations": {
+        "create": {
+          "expected_status": 201,
+          "method": "POST",
+          "path": "/api/v1/mock/tickets",
+          "request_example": {
+            "assignee": "Contract Test Agent",
+            "customer_id": "cus_seed_001",
+            "description": "Disposable support request",
+            "priority": "high",
+            "status": "open",
+            "subject": "API contract test ticket"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/TicketCreate"
+          },
+          "response_example": {
+            "assignee": "Sam Support",
+            "created_at": "2026-08-15T13:10:00Z",
+            "customer_id": "cus_seed_001",
+            "description": "The keyboard does not appear in the Bluetooth device list.",
+            "id": "tkt_seed_001",
+            "priority": "medium",
+            "status": "in_progress",
+            "subject": "Keyboard pairing question",
+            "updated_at": "2026-08-15T13:40:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/TicketResponse"
+          }
+        },
+        "delete": {
+          "expected_status": 204,
+          "method": "DELETE",
+          "path": "/api/v1/mock/tickets/{item_id}",
+          "response_example": null,
+          "response_schema": null
+        },
+        "get": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/tickets/{item_id}",
+          "response_example": {
+            "assignee": "Sam Support",
+            "created_at": "2026-08-15T13:10:00Z",
+            "customer_id": "cus_seed_001",
+            "description": "The keyboard does not appear in the Bluetooth device list.",
+            "id": "tkt_seed_001",
+            "priority": "medium",
+            "status": "in_progress",
+            "subject": "Keyboard pairing question",
+            "updated_at": "2026-08-15T13:40:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/TicketResponse"
+          }
+        },
+        "list": {
+          "expected_status": 200,
+          "method": "GET",
+          "path": "/api/v1/mock/tickets",
+          "response_example": {
+            "items": [
+              {
+                "assignee": "Sam Support",
+                "created_at": "2026-08-15T13:10:00Z",
+                "customer_id": "cus_seed_001",
+                "description": "The keyboard does not appear in the Bluetooth device list.",
+                "id": "tkt_seed_001",
+                "priority": "medium",
+                "status": "in_progress",
+                "subject": "Keyboard pairing question",
+                "updated_at": "2026-08-15T13:40:00Z"
+              },
+              {
+                "assignee": "Taylor Agent",
+                "created_at": "2026-08-13T09:30:00Z",
+                "customer_id": "cus_seed_002",
+                "description": "Please redirect the monitor shipment to the studio entrance.",
+                "id": "tkt_seed_002",
+                "priority": "high",
+                "status": "resolved",
+                "subject": "Update delivery address",
+                "updated_at": "2026-08-13T10:15:00Z"
+              }
+            ],
+            "limit": 20,
+            "offset": 0,
+            "total": 2
+          },
+          "response_schema": {
+            "$ref": "#/$defs/TicketPage"
+          }
+        },
+        "patch": {
+          "expected_status": 200,
+          "method": "PATCH",
+          "path": "/api/v1/mock/tickets/{item_id}",
+          "request_example": {
+            "status": "resolved"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/TicketPatch"
+          },
+          "response_example": {
+            "assignee": "Sam Support",
+            "created_at": "2026-08-15T13:10:00Z",
+            "customer_id": "cus_seed_001",
+            "description": "The keyboard does not appear in the Bluetooth device list.",
+            "id": "tkt_seed_001",
+            "priority": "medium",
+            "status": "in_progress",
+            "subject": "Keyboard pairing question",
+            "updated_at": "2026-08-15T13:40:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/TicketResponse"
+          }
+        },
+        "replace": {
+          "expected_status": 200,
+          "method": "PUT",
+          "path": "/api/v1/mock/tickets/{item_id}",
+          "request_example": {
+            "assignee": "Replacement Test Agent",
+            "customer_id": "cus_seed_002",
+            "description": "Complete ticket replacement",
+            "priority": "low",
+            "status": "in_progress",
+            "subject": "Replacement support ticket"
+          },
+          "request_schema": {
+            "$ref": "#/$defs/TicketReplace"
+          },
+          "response_example": {
+            "assignee": "Sam Support",
+            "created_at": "2026-08-15T13:10:00Z",
+            "customer_id": "cus_seed_001",
+            "description": "The keyboard does not appear in the Bluetooth device list.",
+            "id": "tkt_seed_001",
+            "priority": "medium",
+            "status": "in_progress",
+            "subject": "Keyboard pairing question",
+            "updated_at": "2026-08-15T13:40:00Z"
+          },
+          "response_schema": {
+            "$ref": "#/$defs/TicketResponse"
+          }
+        }
+      }
+    }
+  },
+  "schema_version": 1,
+  "title": "PreMan Mock API Test Schema Catalog"
+}
