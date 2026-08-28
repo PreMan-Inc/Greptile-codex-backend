@@ -1383,7 +1383,7 @@
         "description": "What a consumer reads before calling. The handler ships the wrong type.",
         "properties": {
           "amount_refunded": {
-            "description": "Amount returned to the customer, in currency units.",
+            "description": "Amount returned to the customer, in whole currency units.",
             "examples": [
               42.0
             ],
@@ -1391,6 +1391,7 @@
             "type": "number"
           },
           "order_id": {
+            "description": "Identifier of the refunded order.",
             "examples": [
               "ord-4471"
             ],
@@ -1398,6 +1399,7 @@
             "type": "string"
           },
           "state": {
+            "description": "Where the refund has got to: `pending` or `settled`.",
             "examples": [
               "settled"
             ],

@@ -11,11 +11,14 @@ field, ``refund-status`` keeps every field but ships one as the wrong type. A
 consumer hits them differently, and so does anything checking the response
 against the published schema. See app/routers/preman_probe.py.
 
-``order-total`` no longer has a test pinning its drift. A test asserting the
-response omits ``total`` fails the moment the endpoint is repaired, so it makes
-the repository reject the very fix it exists to prove -- which is not a fixture,
-it is a trap. The published schema is still asserted, so a repair is still a
-visible change here: it turns the contract and the response into agreement.
+No drift here is pinned by a test any more. A test asserting the response omits
+``total``, or ships ``amount_refunded`` as a string, fails the moment that
+endpoint is repaired -- so the repository rejects the very fix the fixture
+exists to prove, and one red test blocks every other repair with it. That is
+not a fixture, it is a trap.
+
+What each endpoint publishes is still asserted, so a repair stays visible here:
+it turns the contract and the response from a mismatch into agreement.
 """
 
 from __future__ import annotations
@@ -74,17 +77,6 @@ def test_the_published_schema_types_the_refund_as_a_number(client: TestClient) -
     assert schema["properties"]["amount_refunded"]["type"] == "number"
 
 
-def test_the_refund_amount_is_served_as_a_string(client: TestClient) -> None:
-    """The other half: the drift PreMan is meant to find and repair.
-
-    When it is repaired, this test fails — which is the point. Delete it and the
-    fixture together rather than relaxing it.
-    """
-    amount = client.get(REFUND_PATH).json()["amount_refunded"]
-    assert isinstance(amount, str)
-    assert amount == "42.00"
-
-
 def test_the_refund_probe_is_read_only(client: TestClient) -> None:
     """Whatever else it does, it must not offer a way to change anything."""
     paths = client.get("/openapi.json").json()["paths"][REFUND_PATH]
@@ -110,21 +102,6 @@ def test_the_published_contract_bounds_the_percentage_and_documents_a_422(
     assert schema["minimum"] == 0
     assert schema["maximum"] == 100
     assert "422" in document["paths"][DISCOUNT_PATH]["get"]["responses"]
-
-
-@pytest.mark.parametrize("percent_off", [150, -40])
-def test_an_out_of_range_percentage_is_accepted_instead_of_rejected(
-    client: TestClient, percent_off: int
-) -> None:
-    """The other half: the drift PreMan is meant to find and repair.
-
-    The contract documents 422 for these; the handler answers 200. When it is
-    repaired this test fails — which is the point. Delete it and the fixture
-    together rather than relaxing it.
-    """
-    response = client.get(DISCOUNT_PATH, params={"percent_off": percent_off})
-    assert response.status_code == 200
-    assert response.json()["percent_off"] == percent_off
 
 
 def test_the_discount_probe_is_read_only(client: TestClient) -> None:

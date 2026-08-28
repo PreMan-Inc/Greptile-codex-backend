@@ -88,11 +88,16 @@ def order_total() -> JSONResponse:
 class RefundStatus(BaseModel):
     """What a consumer reads before calling. The handler ships the wrong type."""
 
-    order_id: str = Field(examples=["ord-4471"])
-    state: str = Field(examples=["settled"])
+    order_id: str = Field(
+        examples=["ord-4471"], description="Identifier of the refunded order."
+    )
+    state: str = Field(
+        examples=["settled"],
+        description="Where the refund has got to: `pending` or `settled`.",
+    )
     amount_refunded: float = Field(
         examples=[42.0],
-        description="Amount returned to the customer, in currency units.",
+        description="Amount returned to the customer, in whole currency units.",
     )
 
 
