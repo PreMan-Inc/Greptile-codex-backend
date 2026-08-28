@@ -1,9 +1,13 @@
-"""One endpoint whose contract is deliberately wrong.
+"""Fixtures for PreMan's own loops: a wrong contract, and a new route.
 
 PreMan is meant to notice when an API stops matching the shape it publishes,
 repair it, and open a pull request. Proving that end to end needs a real
 mismatch on a real deployment, and inventing one by hand each time is slower
 than keeping one here.
+
+``shipping_estimate`` below serves the other half: an endpoint introduced by a
+push, which is what proves the pre-push hook tests a route on the same push
+that adds it rather than only after the next repository scan.
 
 The drift is the ordinary kind: the schema promises ``total``, the handler
 returns ``total_cents``. Same information, clearer name, and every consumer
