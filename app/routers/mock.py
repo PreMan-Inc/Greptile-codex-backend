@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Path, Query, Response, status
 from pydantic import BaseModel
@@ -41,6 +41,13 @@ ERROR_DESCRIPTIONS = {
     409: "The request conflicts with the current JSON document.",
     422: "The request body, query, or referenced record is invalid.",
 }
+
+# Restricted to the fields every mock record carries, so one ordering applies
+# across all collections and an unknown field is a 422 rather than a silent
+# no-op the caller has to notice from the payload.
+SortOrder = Literal[
+    "id", "-id", "created_at", "-created_at", "updated_at", "-updated_at"
+]
 
 
 def _error_responses(*status_codes: int) -> dict[int, dict[str, Any]]:
@@ -128,11 +135,17 @@ def _build_resource_router(config: ResourceConfig) -> APIRouter:
             max_length=100,
             description="Case-insensitive full-record search.",
         ),
+        sort: SortOrder | None = Query(
+            default=None,
+            description="Order the collection before it is paginated. Prefix with `-` for descending.",
+        ),
         limit: int = Query(default=20, ge=1, le=100),
         offset: int = Query(default=0, ge=0),
         store: JsonMockStore = Depends(get_mock_store),
     ):
-        items, total = store.list(config.plural, q=q, limit=limit, offset=offset)
+        items, total = store.list(
+            config.plural, q=q, sort=sort, limit=limit, offset=offset
+        )
         return {"items": items, "total": total, "limit": limit, "offset": offset}
 
     list_items.__name__ = f"mock_list_{config.plural}"

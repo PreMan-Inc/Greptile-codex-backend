@@ -402,46 +402,6 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
-      "HealthResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "environment": {
-            "title": "Environment",
-            "type": "string"
-          },
-          "service": {
-            "title": "Service",
-            "type": "string"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "storage": {
-            "title": "Storage",
-            "type": "string"
-          },
-          "timestamp": {
-            "format": "date-time",
-            "title": "Timestamp",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status",
-          "service",
-          "environment",
-          "storage",
-          "version",
-          "timestamp"
-        ],
-        "title": "HealthResponse",
-        "type": "object"
-      },
       "LoginRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2618,6 +2578,32 @@
             }
           },
           {
+            "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "id",
+                    "-id",
+                    "created_at",
+                    "-created_at",
+                    "updated_at",
+                    "-updated_at"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+              "title": "Sort"
+            }
+          },
+          {
             "in": "query",
             "name": "limit",
             "required": false,
@@ -3003,6 +2989,32 @@
               ],
               "description": "Case-insensitive full-record search.",
               "title": "Q"
+            }
+          },
+          {
+            "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "id",
+                    "-id",
+                    "created_at",
+                    "-created_at",
+                    "updated_at",
+                    "-updated_at"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+              "title": "Sort"
             }
           },
           {
@@ -3394,6 +3406,32 @@
             }
           },
           {
+            "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "id",
+                    "-id",
+                    "created_at",
+                    "-created_at",
+                    "updated_at",
+                    "-updated_at"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+              "title": "Sort"
+            }
+          },
+          {
             "in": "query",
             "name": "limit",
             "required": false,
@@ -3782,6 +3820,32 @@
             }
           },
           {
+            "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "id",
+                    "-id",
+                    "created_at",
+                    "-created_at",
+                    "updated_at",
+                    "-updated_at"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+              "title": "Sort"
+            }
+          },
+          {
             "in": "query",
             "name": "limit",
             "required": false,
@@ -4167,6 +4231,32 @@
               ],
               "description": "Case-insensitive full-record search.",
               "title": "Q"
+            }
+          },
+          {
+            "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "id",
+                    "-id",
+                    "created_at",
+                    "-created_at",
+                    "updated_at",
+                    "-updated_at"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Order the collection before it is paginated. Prefix with `-` for descending.",
+              "title": "Sort"
             }
           },
           {
@@ -5286,27 +5376,6 @@
         "summary": "Replace Task",
         "tags": [
           "Tasks"
-        ]
-      }
-    },
-    "/health": {
-      "get": {
-        "operationId": "health_health_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Health",
-        "tags": [
-          "System"
         ]
       }
     }

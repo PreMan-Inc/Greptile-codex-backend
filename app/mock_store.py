@@ -405,6 +405,7 @@ class JsonMockStore:
         resource: str,
         *,
         q: str | None = None,
+        sort: str | None = None,
         limit: int = 20,
         offset: int = 0,
     ) -> tuple[list[dict[str, Any]], int]:
@@ -419,6 +420,14 @@ class JsonMockStore:
                     if needle in json.dumps(record, ensure_ascii=False).casefold()
                 ]
             total = len(records)
+            if sort:
+                # Ordering happens before the slice, so a page is taken from the
+                # sorted collection rather than sorted after being cut.
+                descending = sort.startswith("-")
+                key = sort.removeprefix("-")
+                records = sorted(
+                    records, key=lambda record: record.get(key, ""), reverse=descending
+                )
             return copy.deepcopy(records[offset : offset + limit]), total
 
     def get(self, resource: str, item_id: str) -> dict[str, Any] | None:
