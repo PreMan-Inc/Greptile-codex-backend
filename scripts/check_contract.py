@@ -2,8 +2,7 @@
 """Fail CI when the preserved legacy contract drifts.
 
 The counts below are derived, not written down. They used to be a literal 23
-that meant "the legacy contract plus however many fixtures exist today", so
-adding a fixture failed this check in a way that read like real drift.
+that meant "the legacy contract plus however many fixtures exist today",
 """
 
 from app.main import app
