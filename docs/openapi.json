@@ -402,6 +402,46 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "service": {
+            "title": "Service",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "storage": {
+            "title": "Storage",
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "title": "Timestamp",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "environment",
+          "storage",
+          "version",
+          "timestamp"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
       "LoginRequest": {
         "additionalProperties": false,
         "properties": {
@@ -812,6 +852,14 @@
             "title": "Order Id",
             "type": "string"
           },
+          "paid": {
+            "description": "Whether the order has been settled in full.",
+            "examples": [
+              true
+            ],
+            "title": "Paid",
+            "type": "boolean"
+          },
           "total": {
             "description": "Order total, in currency units.",
             "examples": [
@@ -824,7 +872,8 @@
         "required": [
           "order_id",
           "currency",
-          "total"
+          "total",
+          "paid"
         ],
         "title": "OrderTotal",
         "type": "object"
@@ -5376,6 +5425,27 @@
         "summary": "Replace Task",
         "tags": [
           "Tasks"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "System"
         ]
       }
     }
