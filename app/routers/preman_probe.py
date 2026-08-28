@@ -47,8 +47,13 @@ router = APIRouter(tags=["preman-probe"])
 class OrderTotal(BaseModel):
     """What the endpoint promises. The handler no longer honours ``total``."""
 
-    order_id: str = Field(examples=["ord-4471"])
-    currency: str = Field(examples=["GBP"])
+    order_id: str = Field(
+        examples=["ord-4471"], description="The order this total belongs to."
+    )
+    currency: str = Field(
+        examples=["GBP"],
+        description="ISO 4217 code that `total` is denominated in.",
+    )
     total: float = Field(examples=[42.0], description="Order total, in currency units.")
     paid: bool = Field(
         examples=[True],

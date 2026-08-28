@@ -849,6 +849,7 @@
         "description": "What the endpoint promises. The handler no longer honours ``total``.",
         "properties": {
           "currency": {
+            "description": "ISO 4217 code that `total` is denominated in.",
             "examples": [
               "GBP"
             ],
@@ -856,6 +857,7 @@
             "type": "string"
           },
           "order_id": {
+            "description": "The order this total belongs to.",
             "examples": [
               "ord-4471"
             ],
