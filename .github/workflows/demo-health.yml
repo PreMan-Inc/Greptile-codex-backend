@@ -1,5 +1,7 @@
 name: Public demo health
 
+# Runs against the deployed demo URL, so a red run here means the deployment
+# drifted from the repository, not that the commit under test is broken.
 on:
   schedule:
     - cron: "*/15 * * * *"
