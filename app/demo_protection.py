@@ -11,7 +11,7 @@ def is_protected_demo_resource(
 ) -> bool:
     return settings.app_env == "demo" and resource_id in protected_ids
 
-
+#test
 def require_mutable_demo_resource(
     settings: Settings,
     resource_id: str,
