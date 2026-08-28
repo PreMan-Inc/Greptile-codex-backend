@@ -43,7 +43,7 @@ def test_the_probe_answers_and_says_which_order_it_is_about(client: TestClient) 
 def test_the_published_schema_still_promises_a_total(client: TestClient) -> None:
     """The half of the mismatch a consumer reads before calling."""
     schema = client.get("/openapi.json").json()["components"]["schemas"]["OrderTotal"]
-    assert set(schema["properties"]) == {"order_id", "currency", "total"}
+    assert set(schema["properties"]) == {"order_id", "currency", "total", "paid"}
 
 
 def test_the_response_does_not_carry_the_total_it_promised(client: TestClient) -> None:
