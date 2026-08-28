@@ -30,6 +30,9 @@ thing being tested, and Pydantic would quietly coerce ``"42.00"`` to ``42.0``.
 Read-only, no stored state, and it answers the same way every time, so the only
 thing it can break is a caller expecting the published contract. To retire the
 fixture, delete this module and its line in ``app.main``.
+
+A green contract check against these four routes therefore means the check is
+not reading the response, not that the routes are correct.
 """
 
 from __future__ import annotations
