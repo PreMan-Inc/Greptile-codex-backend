@@ -8,6 +8,8 @@ from datetime import UTC, datetime
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
+
+
 from fastapi.responses import HTMLResponse, JSONResponse
 from mangum import Mangum
 
@@ -15,6 +17,8 @@ from app.config import get_settings
 from app.errors import install_error_handlers
 from app.mock_schema_catalog import load_mock_schema_catalog
 from app.mock_store import create_mock_store
+
+
 from app.mock_ui import mock_test_ui
 from app.repositories import create_repository
 from app.routers import auth, mock, preman_probe, projects, tasks
@@ -139,16 +143,16 @@ def readiness() -> dict[str, str]:
     }
 
 
-@app.get("/health", response_model=HealthResponse, tags=["System"])
-def health() -> HealthResponse:
-    return HealthResponse(
-        status="ok",
-        service=settings.app_name,
-        environment=settings.app_env,
-        storage=settings.storage_backend,
-        version="2.0.0",
-        timestamp=datetime.now(UTC),
-    )
+# @app.get("/health", response_model=HealthResponse, tags=["System"])
+# def health() -> HealthResponse:
+#     return HealthResponse(
+#         status="ok",
+#         service=settings.app_name,
+#         environment=settings.app_env,
+#         storage=settings.storage_backend,
+#         version="2.0.0",
+#         timestamp=datetime.now(UTC),
+#     )
 
 
 @app.get("/mock-openapi.json", include_in_schema=False)
