@@ -269,6 +269,13 @@ For PreMan or another schema-driven test system, ingest `/mock-openapi.json` to 
 only the 30 mock operations. Ingest `/openapi.json` when both the mock and legacy APIs
 should be tested.
 
+`app/routers/preman_probe.py` is the exception to all of the above: four routes under
+`/api/v1/preman-probe/` that deliberately break the contract they publish, so a testing
+system has something real to catch. `order-total` renames `total` to `total_cents`,
+`refund-status` ships a documented number as a string, and `discount` accepts a
+`percent_off` outside the 0–100 range it documents. Do not "fix" them without deleting
+the fixture — a green run against these routes means the checks are not looking.
+
 ## Deploy the stable AWS demo URL
 
 The included CloudFormation stack runs FastAPI behind a public Lambda Function URL. It
