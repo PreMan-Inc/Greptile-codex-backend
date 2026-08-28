@@ -5440,6 +5440,7 @@
     },
     "/health": {
       "get": {
+        "description": "Liveness, for load balancers and uptime checks.\n\nAnswers `HealthResponse`: `status` is `ok` while the service is serving\ntraffic. Unlike `/ready` this does not wait on storage, so it stays\nanswerable while a dependency is down and can be polled cheaply.",
         "operationId": "health_health_get",
         "responses": {
           "200": {

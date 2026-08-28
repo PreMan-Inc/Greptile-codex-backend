@@ -145,6 +145,12 @@ def readiness() -> dict[str, str]:
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 def health() -> JSONResponse:
+    """Liveness, for load balancers and uptime checks.
+
+    Answers `HealthResponse`: `status` is `ok` while the service is serving
+    traffic. Unlike `/ready` this does not wait on storage, so it stays
+    answerable while a dependency is down and can be polled cheaply.
+    """
     return JSONResponse(
         {
             "state": "up",
