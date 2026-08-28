@@ -79,8 +79,8 @@ def order_total() -> JSONResponse:
         {
             "order_id": "ord-4471",
             "currency": "GBP",
-            # The drift under test: `total` renamed, the schema left behind.
-            "total_cents": 4200,
+            "total": 42.0,
+            "paid": True,
         }
     )
 
