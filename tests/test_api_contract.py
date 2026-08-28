@@ -44,6 +44,7 @@ LEGACY_OPERATIONS = {
 # this test. See app/routers/preman_probe.py.
 PROBE_OPERATIONS = {
     ("GET", "/api/v1/preman-probe/order-total"),
+    ("GET", "/api/v1/preman-probe/refund-status"),
     ("GET", "/api/v1/preman-probe/shipping-estimate"),
 }
 

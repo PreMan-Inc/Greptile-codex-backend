@@ -1323,6 +1323,40 @@
         "title": "RefreshRequest",
         "type": "object"
       },
+      "RefundStatus": {
+        "description": "What a consumer reads before calling. The handler ships the wrong type.",
+        "properties": {
+          "amount_refunded": {
+            "description": "Amount returned to the customer, in currency units.",
+            "examples": [
+              42.0
+            ],
+            "title": "Amount Refunded",
+            "type": "number"
+          },
+          "order_id": {
+            "examples": [
+              "ord-4471"
+            ],
+            "title": "Order Id",
+            "type": "string"
+          },
+          "state": {
+            "examples": [
+              "settled"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id",
+          "state",
+          "amount_refunded"
+        ],
+        "title": "RefundStatus",
+        "type": "object"
+      },
       "RegisterRequest": {
         "additionalProperties": false,
         "properties": {
@@ -4480,6 +4514,28 @@
           }
         },
         "summary": "An order total, in the shape the schema promises",
+        "tags": [
+          "preman-probe"
+        ]
+      }
+    },
+    "/api/v1/preman-probe/refund-status": {
+      "get": {
+        "description": "A fixture for PreMan's self-healing loop. The published schema types `amount_refunded` as a number; the handler serialises it as a string. The repair is to serve the documented type again.",
+        "operationId": "refund_status_api_v1_preman_probe_refund_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "A refund's state and the amount returned",
         "tags": [
           "preman-probe"
         ]
