@@ -121,8 +121,8 @@ def refund_status() -> JSONResponse:
         {
             "order_id": "ord-4471",
             "state": "settled",
-            # The drift under test: a number published, a string served.
-            "amount_refunded": "42.00",
+            "amount_refunded": 42.0,
+            "refunded_at": "2026-08-28T19:30:00Z",
         }
     )
 
