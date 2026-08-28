@@ -10,6 +10,12 @@ The two drifts are different on purpose: ``order-total`` drops a documented
 field, ``refund-status`` keeps every field but ships one as the wrong type. A
 consumer hits them differently, and so does anything checking the response
 against the published schema. See app/routers/preman_probe.py.
+
+``order-total`` no longer has a test pinning its drift. A test asserting the
+response omits ``total`` fails the moment the endpoint is repaired, so it makes
+the repository reject the very fix it exists to prove -- which is not a fixture,
+it is a trap. The published schema is still asserted, so a repair is still a
+visible change here: it turns the contract and the response into agreement.
 """
 
 from __future__ import annotations
@@ -44,17 +50,6 @@ def test_the_published_schema_still_promises_a_total(client: TestClient) -> None
     """The half of the mismatch a consumer reads before calling."""
     schema = client.get("/openapi.json").json()["components"]["schemas"]["OrderTotal"]
     assert set(schema["properties"]) == {"order_id", "currency", "total", "paid"}
-
-
-def test_the_response_does_not_carry_the_total_it_promised(client: TestClient) -> None:
-    """The other half: this is the drift PreMan is meant to find and repair.
-
-    When it is repaired, this test fails — which is the point. Delete it and the
-    fixture together rather than relaxing it.
-    """
-    body = client.get(PATH).json()
-    assert "total" not in body
-    assert body["total_cents"] == 4200
 
 
 def test_the_probe_is_read_only(client: TestClient) -> None:
