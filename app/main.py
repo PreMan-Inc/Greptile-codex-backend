@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-# import necessary libraries
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
-# import necessary modules
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
@@ -18,8 +16,6 @@ from app.errors import install_error_handlers
 from app.mock_schema_catalog import load_mock_schema_catalog
 from app.mock_store import create_mock_store
 from app.mock_ui import mock_test_ui
-
-
 from app.repositories import create_repository
 from app.routers import auth, mock, preman_probe, projects, tasks
 from app.schemas import HealthResponse
