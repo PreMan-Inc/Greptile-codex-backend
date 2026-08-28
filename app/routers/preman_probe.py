@@ -48,7 +48,7 @@ class OrderTotal(BaseModel):
     """What the endpoint promises. The handler no longer honours ``total``."""
 
     order_id: str = Field(
-        examples=["ord-4471"], description="The order this total belongs to."
+        examples=["ord-4471"], description="Identifier of the order being totalled."
     )
     currency: str = Field(
         examples=["GBP"],

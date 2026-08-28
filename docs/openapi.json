@@ -857,7 +857,7 @@
             "type": "string"
           },
           "order_id": {
-            "description": "The order this total belongs to.",
+            "description": "Identifier of the order being totalled.",
             "examples": [
               "ord-4471"
             ],
