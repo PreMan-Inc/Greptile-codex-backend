@@ -1398,6 +1398,14 @@
             "title": "Order Id",
             "type": "string"
           },
+          "refunded_at": {
+            "description": "When the refund settled, as an RFC 3339 timestamp in UTC.",
+            "examples": [
+              "2026-08-28T19:30:00Z"
+            ],
+            "title": "Refunded At",
+            "type": "string"
+          },
           "state": {
             "description": "Where the refund has got to: `pending` or `settled`.",
             "examples": [
@@ -1410,7 +1418,8 @@
         "required": [
           "order_id",
           "state",
-          "amount_refunded"
+          "amount_refunded",
+          "refunded_at"
         ],
         "title": "RefundStatus",
         "type": "object"
@@ -4748,7 +4757,7 @@
     },
     "/api/v1/preman-probe/refund-status": {
       "get": {
-        "description": "A fixture for PreMan's self-healing loop. The published schema types `amount_refunded` as a number; the handler serialises it as a string. The repair is to serve the documented type again.",
+        "description": "A fixture for PreMan's self-healing loop. The published schema types `amount_refunded` as a number; the handler serialises it as a string, and omits `refunded_at` altogether. The repair is to serve what is documented: the right type, and every field.",
         "operationId": "refund_status_api_v1_preman_probe_refund_status_get",
         "responses": {
           "200": {

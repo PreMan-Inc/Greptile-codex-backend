@@ -99,6 +99,10 @@ class RefundStatus(BaseModel):
         examples=[42.0],
         description="Amount returned to the customer, in whole currency units.",
     )
+    refunded_at: str = Field(
+        examples=["2026-08-28T19:30:00Z"],
+        description="When the refund settled, as an RFC 3339 timestamp in UTC.",
+    )
 
 
 @router.get(
@@ -107,8 +111,9 @@ class RefundStatus(BaseModel):
     summary="A refund's state and the amount returned",
     description=(
         "A fixture for PreMan's self-healing loop. The published schema types "
-        "`amount_refunded` as a number; the handler serialises it as a string. "
-        "The repair is to serve the documented type again."
+        "`amount_refunded` as a number; the handler serialises it as a string, "
+        "and omits `refunded_at` altogether. The repair is to serve what is "
+        "documented: the right type, and every field."
     ),
 )
 def refund_status() -> JSONResponse:

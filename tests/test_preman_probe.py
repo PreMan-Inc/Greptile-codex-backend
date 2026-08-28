@@ -61,12 +61,24 @@ def test_the_probe_is_read_only(client: TestClient) -> None:
     assert set(paths) == {"get"}
 
 
-def test_the_refund_probe_answers_with_every_documented_field(client: TestClient) -> None:
-    """Unlike the order probe, nothing here is missing — only mistyped."""
+def test_the_refund_probe_answers_only_fields_it_documents(client: TestClient) -> None:
+    """Every key served is published, and the identifying ones are always there.
+
+    Deliberately a subset check rather than an equality one. The endpoint may
+    publish a field it does not yet serve -- that is the drift -- so pinning the
+    exact key set would fail the moment such a field is repaired into the
+    response, and the repository would reject the fix. Undocumented keys are
+    still caught, which is the direction that harms a consumer.
+    """
     response = client.get(REFUND_PATH)
     assert response.status_code == 200
     body = response.json()
-    assert set(body) == {"order_id", "state", "amount_refunded"}
+    documented = set(
+        client.get("/openapi.json").json()["components"]["schemas"]["RefundStatus"][
+            "properties"
+        ]
+    )
+    assert {"order_id", "state"} <= set(body) <= documented
     assert body["order_id"] == "ord-4471"
     assert body["state"] == "settled"
 
