@@ -144,7 +144,7 @@ def readiness() -> dict[str, str]:
 
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
-def health() -> HealthResponse::
+def health() -> HealthResponse::.
     return HealthResponse(
         status="ok",
         service=settings.app_name,
