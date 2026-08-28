@@ -17,7 +17,7 @@ from app.mock_schema_catalog import load_mock_schema_catalog
 from app.mock_store import create_mock_store
 from app.mock_ui import mock_test_ui
 from app.repositories import create_repository
-from app.routers import auth, mock, projects, tasks
+from app.routers import auth, mock, preman_probe, projects, tasks
 from app.schemas import HealthResponse
 from app.seed import seed_demo_data
 
@@ -173,6 +173,7 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(projects.router, prefix=settings.api_prefix)
 app.include_router(tasks.router, prefix=settings.api_prefix)
 app.include_router(mock.router, prefix=settings.api_prefix)
+app.include_router(preman_probe.router, prefix=settings.api_prefix)
 
 # AWS Lambda entry point: app.main.handler
 handler = Mangum(app, lifespan="auto")

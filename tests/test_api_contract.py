@@ -37,6 +37,10 @@ EXPECTED_OPERATIONS = {
     ("PUT", "/api/v1/tasks/{task_id}"),
     ("PATCH", "/api/v1/tasks/{task_id}"),
     ("DELETE", "/api/v1/tasks/{task_id}"),
+    # A fixture for PreMan's self-healing loop, not part of the legacy
+    # contract. Listed so the drift it carries stays inside its own handler
+    # rather than tripping this check. See app/routers/preman_probe.py.
+    ("GET", "/api/v1/preman-probe/order-total"),
 }
 
 
@@ -91,7 +95,7 @@ def assert_error(response, *, status: int, code: str | None = None) -> dict[str,
     return body
 
 
-def test_openapi_contains_exactly_the_22_operation_contract(client: TestClient) -> None:
+def test_openapi_contains_exactly_the_23_operation_contract(client: TestClient) -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     document = response.json()
@@ -112,7 +116,7 @@ def test_openapi_contains_exactly_the_22_operation_contract(client: TestClient) 
         if method.lower() in {"get", "post", "put", "patch", "delete"}
     }
     assert operations == EXPECTED_OPERATIONS
-    assert len(operations) == 22
+    assert len(operations) == 23
 
     operation_ids = []
     for method, path in operations:

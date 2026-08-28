@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail CI when the preserved legacy contract drifts from its 22 operations."""
+"""Fail CI when the preserved legacy contract drifts from its 23 operations."""
 
 from app.main import app
 
@@ -26,6 +26,10 @@ EXPECTED_OPERATIONS = {
     ("PUT", "/api/v1/tasks/{task_id}"),
     ("PATCH", "/api/v1/tasks/{task_id}"),
     ("DELETE", "/api/v1/tasks/{task_id}"),
+    # A fixture for PreMan's self-healing loop, not part of the legacy
+    # contract. Listed so the drift it carries stays inside its own handler
+    # rather than tripping this check. See app/routers/preman_probe.py.
+    ("GET", "/api/v1/preman-probe/order-total"),
 }
 
 
@@ -47,10 +51,10 @@ def main() -> None:
         missing = sorted(EXPECTED_OPERATIONS - actual)
         unexpected = sorted(actual - EXPECTED_OPERATIONS)
         raise SystemExit(
-            "Legacy API contract drifted from 22 operations. "
+            "Legacy API contract drifted from 23 operations. "
             f"Missing: {missing or 'none'}; unexpected: {unexpected or 'none'}"
         )
-    print("PASS: OpenAPI exposes the exact preserved 22-operation legacy contract")
+    print("PASS: OpenAPI exposes the exact preserved 23-operation contract")
 
 
 if __name__ == "__main__":

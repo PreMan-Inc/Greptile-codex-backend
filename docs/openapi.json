@@ -800,6 +800,40 @@
         "title": "OrderStatus",
         "type": "string"
       },
+      "OrderTotal": {
+        "description": "What the endpoint promises. The handler no longer honours ``total``.",
+        "properties": {
+          "currency": {
+            "examples": [
+              "GBP"
+            ],
+            "title": "Currency",
+            "type": "string"
+          },
+          "order_id": {
+            "examples": [
+              "ord-4471"
+            ],
+            "title": "Order Id",
+            "type": "string"
+          },
+          "total": {
+            "description": "Order total, in currency units.",
+            "examples": [
+              42.0
+            ],
+            "title": "Total",
+            "type": "number"
+          }
+        },
+        "required": [
+          "order_id",
+          "currency",
+          "total"
+        ],
+        "title": "OrderTotal",
+        "type": "object"
+      },
       "OrderUpdate": {
         "additionalProperties": false,
         "properties": {
@@ -4393,6 +4427,28 @@
         "summary": "Replace a mock ticket",
         "tags": [
           "Mock Tickets"
+        ]
+      }
+    },
+    "/api/v1/preman-probe/order-total": {
+      "get": {
+        "description": "A fixture for PreMan's self-healing loop. The published schema names `total`; the handler returns `total_cents`. The repair is to serve the documented field again.",
+        "operationId": "order_total_api_v1_preman_probe_order_total_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderTotal"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "An order total, in the shape the schema promises",
+        "tags": [
+          "preman-probe"
         ]
       }
     },
