@@ -52,3 +52,25 @@ def order_total() -> JSONResponse:
             "total_cents": 4200,
         }
     )
+
+
+class ShippingEstimate(BaseModel):
+    """An honest contract, unlike ``OrderTotal`` above."""
+
+    order_id: str = Field(examples=["ord-4471"])
+    carrier: str = Field(examples=["Royal Mail"])
+    business_days: int = Field(examples=[3])
+
+
+@router.get(
+    "/preman-probe/shipping-estimate",
+    response_model=ShippingEstimate,
+    summary="A delivery estimate for an order",
+    description=(
+        "A route with no history in PreMan's inventory. It exists to show that a "
+        "push introducing an endpoint gets that endpoint tested on the same push, "
+        "rather than only after the next repository scan."
+    ),
+)
+def shipping_estimate() -> ShippingEstimate:
+    return ShippingEstimate(order_id="ord-4471", carrier="Royal Mail", business_days=3)
