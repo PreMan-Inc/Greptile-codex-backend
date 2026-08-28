@@ -52,8 +52,18 @@ def main() -> None:
     }
     if health.get("status") != "ok" or ready.get("status") != "ready":
         raise RuntimeError("The demo service is not healthy and ready")
-    if len(operations) != 22:
-        raise RuntimeError(f"Expected 22 legacy operations, found {len(operations)}")
+    # The probe fixtures live under /api/v1/ and so match the legacy filter
+    # above, but they are not part of the preserved contract. Counting them as
+    # legacy would fail this check the first time a deploy carries one, which is
+    # exactly when the service is healthy. Separate them, then hold the legacy
+    # count that actually matters.
+    probe_operations = {op for op in operations if op[1].startswith("/api/v1/preman-probe/")}
+    legacy_operations = operations - probe_operations
+    if len(legacy_operations) != 22:
+        raise RuntimeError(
+            f"Expected 22 legacy operations, found {len(legacy_operations)} "
+            f"(plus {len(probe_operations)} probe fixtures)"
+        )
     if len(mock_operations) != 30:
         raise RuntimeError(f"Expected 30 mock operations, found {len(mock_operations)}")
     if set(mock_schemas.get("resources", {})) != {

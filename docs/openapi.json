@@ -252,6 +252,41 @@
         "title": "CustomerUpdate",
         "type": "object"
       },
+      "DiscountQuote": {
+        "description": "A discounted total. The bound on ``percent_off`` is published, not kept.",
+        "properties": {
+          "order_id": {
+            "examples": [
+              "ord-4471"
+            ],
+            "title": "Order Id",
+            "type": "string"
+          },
+          "percent_off": {
+            "examples": [
+              15
+            ],
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Percent Off",
+            "type": "integer"
+          },
+          "total": {
+            "examples": [
+              35.7
+            ],
+            "title": "Total",
+            "type": "number"
+          }
+        },
+        "required": [
+          "order_id",
+          "percent_off",
+          "total"
+        ],
+        "title": "DiscountQuote",
+        "type": "object"
+      },
       "ErrorBody": {
         "additionalProperties": false,
         "properties": {
@@ -4494,6 +4529,45 @@
         "summary": "Replace a mock ticket",
         "tags": [
           "Mock Tickets"
+        ]
+      }
+    },
+    "/api/v1/preman-probe/discount": {
+      "get": {
+        "description": "A fixture for PreMan's self-healing loop, and the only one here whose drift is on the way in. The published contract bounds `percent_off` to 0\u2013100 and documents HTTP 422 for anything else; the handler declares no bounds and answers 200 for any integer, including 150 and -40. The repair is to enforce the range the schema already documents.",
+        "operationId": "discount_api_v1_preman_probe_discount_get",
+        "parameters": [
+          {
+            "description": "Percentage off the order total. Documented as 0\u2013100.",
+            "in": "query",
+            "name": "percent_off",
+            "required": false,
+            "schema": {
+              "default": 15,
+              "description": "Percentage off the order total. Documented as 0\u2013100.",
+              "title": "Percent Off",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscountQuote"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "A `percent_off` outside 0\u2013100 is rejected."
+          }
+        },
+        "summary": "An order total with a percentage discount applied",
+        "tags": [
+          "preman-probe"
         ]
       }
     },

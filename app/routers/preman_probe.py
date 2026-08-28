@@ -9,12 +9,19 @@ than keeping one here.
 push, which is what proves the pre-push hook tests a route on the same push
 that adds it rather than only after the next repository scan.
 
-The two drifts are deliberately different shapes, because they fail different
-assertions. ``order_total`` renames a field: the schema promises ``total``, the
-handler returns ``total_cents``, and a consumer reading ``total`` gets nothing —
-a missing-field failure. ``refund_status`` keeps every documented name but ships
-``amount_refunded`` as a string where the schema types it as a number — a
-type failure, which is what a consumer that does arithmetic on it trips over.
+The drifts are deliberately different shapes, because they fail differently.
+``order_total`` renames a field: the schema promises ``total``, the handler
+returns ``total_cents``, and a consumer reading ``total`` gets nothing — a
+missing-field failure. ``refund_status`` keeps every documented name but ships
+``amount_refunded`` as a string where the schema types it as a number — a type
+failure, which is what a consumer doing arithmetic on it trips over. Both are
+drifts on the way out.
+
+``discount`` is the one on the way in: the contract bounds ``percent_off`` to
+0–100 and documents a 422, and the handler enforces neither, so invalid input
+is accepted rather than rejected. That is a stronger repair signal than a
+broken response — a wrong answer is arguable, an unenforced documented
+constraint is not — and it is the shape most real APIs get wrong first.
 
 Returning a ``JSONResponse`` is what makes either observable: FastAPI validates
 a returned model against ``response_model`` and would otherwise correct the very
@@ -27,7 +34,7 @@ fixture, delete this module and its line in ``app.main``.
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -91,6 +98,43 @@ def refund_status() -> JSONResponse:
             "state": "settled",
             # The drift under test: a number published, a string served.
             "amount_refunded": "42.00",
+        }
+    )
+
+
+class DiscountQuote(BaseModel):
+    """A discounted total. The bound on ``percent_off`` is published, not kept."""
+
+    order_id: str = Field(examples=["ord-4471"])
+    percent_off: int = Field(examples=[15], ge=0, le=100)
+    total: float = Field(examples=[35.7])
+
+
+@router.get(
+    "/preman-probe/discount",
+    response_model=DiscountQuote,
+    responses={422: {"description": "A `percent_off` outside 0–100 is rejected."}},
+    summary="An order total with a percentage discount applied",
+    description=(
+        "A fixture for PreMan's self-healing loop, and the only one here whose "
+        "drift is on the way in. The published contract bounds `percent_off` to "
+        "0–100 and documents HTTP 422 for anything else; the handler declares no "
+        "bounds and answers 200 for any integer, including 150 and -40. The "
+        "repair is to enforce the range the schema already documents."
+    ),
+)
+def discount(
+    percent_off: int = Query(
+        default=15, description="Percentage off the order total. Documented as 0–100."
+    ),
+) -> JSONResponse:
+    # The drift under test: no ge/le, so validation never runs and an
+    # out-of-range percentage is accepted rather than rejected with a 422.
+    return JSONResponse(
+        {
+            "order_id": "ord-4471",
+            "percent_off": percent_off,
+            "total": round(42.0 * (1 - percent_off / 100), 2),
         }
     )
 

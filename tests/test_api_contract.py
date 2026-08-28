@@ -43,6 +43,7 @@ LEGACY_OPERATIONS = {
 # so the drift they carry stays inside their own handlers rather than failing
 # this test. See app/routers/preman_probe.py.
 PROBE_OPERATIONS = {
+    ("GET", "/api/v1/preman-probe/discount"),
     ("GET", "/api/v1/preman-probe/order-total"),
     ("GET", "/api/v1/preman-probe/refund-status"),
     ("GET", "/api/v1/preman-probe/shipping-estimate"),
