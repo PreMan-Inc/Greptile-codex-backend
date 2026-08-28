@@ -175,12 +175,12 @@ class TaskListResponse(APIModel):
 
 
 class HealthResponse(APIModel):
-    status: str
-    service: str
-    environment: str
-    storage: str
-    version: str
-    timestamp: datetime
+    status: str = Field(description="`ok` when the service is serving traffic.")
+    service: str = Field(description="The service's own name, for multi-service dashboards.")
+    environment: str = Field(description="Which deployment answered: development, demo or production.")
+    storage: str = Field(description="The storage backend currently in use.")
+    version: str = Field(description="The running application version.")
+    timestamp: datetime = Field(description="When this answer was produced, in UTC.")
 
 
 class ErrorDetail(BaseModel):

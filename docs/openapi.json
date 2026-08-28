@@ -406,27 +406,33 @@
         "additionalProperties": false,
         "properties": {
           "environment": {
+            "description": "Which deployment answered: development, demo or production.",
             "title": "Environment",
             "type": "string"
           },
           "service": {
+            "description": "The service's own name, for multi-service dashboards.",
             "title": "Service",
             "type": "string"
           },
           "status": {
+            "description": "`ok` when the service is serving traffic.",
             "title": "Status",
             "type": "string"
           },
           "storage": {
+            "description": "The storage backend currently in use.",
             "title": "Storage",
             "type": "string"
           },
           "timestamp": {
+            "description": "When this answer was produced, in UTC.",
             "format": "date-time",
             "title": "Timestamp",
             "type": "string"
           },
           "version": {
+            "description": "The running application version.",
             "title": "Version",
             "type": "string"
           }
