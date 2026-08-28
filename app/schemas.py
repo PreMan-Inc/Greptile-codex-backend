@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -175,7 +175,9 @@ class TaskListResponse(APIModel):
 
 
 class HealthResponse(APIModel):
-    status: str = Field(description="`ok` when the service is serving traffic.")
+    status: Literal["ok", "degraded"] = Field(
+        description="`ok` when the service is serving traffic, `degraded` otherwise."
+    )
     service: str = Field(description="The service's own name, for multi-service dashboards.")
     environment: str = Field(description="Which deployment answered: development, demo or production.")
     storage: str = Field(description="The storage backend currently in use.")

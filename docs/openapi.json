@@ -416,7 +416,11 @@
             "type": "string"
           },
           "status": {
-            "description": "`ok` when the service is serving traffic.",
+            "description": "`ok` when the service is serving traffic, `degraded` otherwise.",
+            "enum": [
+              "ok",
+              "degraded"
+            ],
             "title": "Status",
             "type": "string"
           },
