@@ -50,6 +50,10 @@ class OrderTotal(BaseModel):
     order_id: str = Field(examples=["ord-4471"])
     currency: str = Field(examples=["GBP"])
     total: float = Field(examples=[42.0], description="Order total, in currency units.")
+    paid: bool = Field(
+        examples=[True],
+        description="Whether the order has been settled in full.",
+    )
 
 
 @router.get(
