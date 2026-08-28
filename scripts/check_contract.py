@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Fail CI when the preserved legacy contract drifts from its 23 operations."""
+"""Fail CI when the preserved legacy contract drifts.
+
+The counts below are derived, not written down. They used to be a literal 23
+that meant "the legacy contract plus however many fixtures exist today", so
+adding a fixture failed this check in a way that read like real drift.
+"""
 
 from app.main import app
 
-EXPECTED_OPERATIONS = {
+LEGACY_OPERATIONS = {
     ("GET", "/health"),
     ("POST", "/api/v1/auth/register"),
     ("POST", "/api/v1/auth/login"),
@@ -26,11 +31,17 @@ EXPECTED_OPERATIONS = {
     ("PUT", "/api/v1/tasks/{task_id}"),
     ("PATCH", "/api/v1/tasks/{task_id}"),
     ("DELETE", "/api/v1/tasks/{task_id}"),
-    # A fixture for PreMan's self-healing loop, not part of the legacy
-    # contract. Listed so the drift it carries stays inside its own handler
-    # rather than tripping this check. See app/routers/preman_probe.py.
-    ("GET", "/api/v1/preman-probe/order-total"),
 }
+
+# Fixtures for PreMan's own loops, not part of the preserved contract. Listed
+# so the drift they carry stays inside their own handlers rather than tripping
+# this check. See app/routers/preman_probe.py.
+PROBE_OPERATIONS = {
+    ("GET", "/api/v1/preman-probe/order-total"),
+    ("GET", "/api/v1/preman-probe/shipping-estimate"),
+}
+
+EXPECTED_OPERATIONS = LEGACY_OPERATIONS | PROBE_OPERATIONS
 
 
 def main() -> None:
@@ -51,10 +62,14 @@ def main() -> None:
         missing = sorted(EXPECTED_OPERATIONS - actual)
         unexpected = sorted(actual - EXPECTED_OPERATIONS)
         raise SystemExit(
-            "Legacy API contract drifted from 23 operations. "
+            f"Legacy API contract drifted from {len(LEGACY_OPERATIONS)} operations "
+            f"plus {len(PROBE_OPERATIONS)} probe fixtures. "
             f"Missing: {missing or 'none'}; unexpected: {unexpected or 'none'}"
         )
-    print("PASS: OpenAPI exposes the exact preserved 23-operation contract")
+    print(
+        f"PASS: OpenAPI exposes the preserved {len(LEGACY_OPERATIONS)}-operation "
+        f"contract and {len(PROBE_OPERATIONS)} probe fixtures"
+    )
 
 
 if __name__ == "__main__":

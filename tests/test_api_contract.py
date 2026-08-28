@@ -14,7 +14,7 @@ from app.seed import DEMO_PROJECT_ID, DEMO_TASK_ONE_ID, DEMO_USER_ID
 DEMO_EMAIL = "demo@preman.live"
 DEMO_PASSWORD = "PremanDemo123!"
 
-EXPECTED_OPERATIONS = {
+LEGACY_OPERATIONS = {
     ("GET", "/health"),
     ("POST", "/api/v1/auth/register"),
     ("POST", "/api/v1/auth/login"),
@@ -37,11 +37,17 @@ EXPECTED_OPERATIONS = {
     ("PUT", "/api/v1/tasks/{task_id}"),
     ("PATCH", "/api/v1/tasks/{task_id}"),
     ("DELETE", "/api/v1/tasks/{task_id}"),
-    # A fixture for PreMan's self-healing loop, not part of the legacy
-    # contract. Listed so the drift it carries stays inside its own handler
-    # rather than tripping this check. See app/routers/preman_probe.py.
-    ("GET", "/api/v1/preman-probe/order-total"),
 }
+
+# Fixtures for PreMan's own loops, not part of the preserved contract. Listed
+# so the drift they carry stays inside their own handlers rather than failing
+# this test. See app/routers/preman_probe.py.
+PROBE_OPERATIONS = {
+    ("GET", "/api/v1/preman-probe/order-total"),
+    ("GET", "/api/v1/preman-probe/shipping-estimate"),
+}
+
+EXPECTED_OPERATIONS = LEGACY_OPERATIONS | PROBE_OPERATIONS
 
 
 @pytest.fixture(scope="module")
@@ -95,7 +101,7 @@ def assert_error(response, *, status: int, code: str | None = None) -> dict[str,
     return body
 
 
-def test_openapi_contains_exactly_the_23_operation_contract(client: TestClient) -> None:
+def test_openapi_contains_exactly_the_preserved_contract(client: TestClient) -> None:
     response = client.get("/openapi.json")
     assert response.status_code == 200
     document = response.json()
@@ -116,7 +122,8 @@ def test_openapi_contains_exactly_the_23_operation_contract(client: TestClient) 
         if method.lower() in {"get", "post", "put", "patch", "delete"}
     }
     assert operations == EXPECTED_OPERATIONS
-    assert len(operations) == 23
+    # Derived, so adding a probe fixture does not read as legacy contract drift.
+    assert len(operations) == len(LEGACY_OPERATIONS) + len(PROBE_OPERATIONS)
 
     operation_ids = []
     for method, path in operations:

@@ -1560,6 +1560,39 @@
         "title": "Role",
         "type": "string"
       },
+      "ShippingEstimate": {
+        "description": "An honest contract, unlike ``OrderTotal`` above.",
+        "properties": {
+          "business_days": {
+            "examples": [
+              3
+            ],
+            "title": "Business Days",
+            "type": "integer"
+          },
+          "carrier": {
+            "examples": [
+              "Royal Mail"
+            ],
+            "title": "Carrier",
+            "type": "string"
+          },
+          "order_id": {
+            "examples": [
+              "ord-4471"
+            ],
+            "title": "Order Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id",
+          "carrier",
+          "business_days"
+        ],
+        "title": "ShippingEstimate",
+        "type": "object"
+      },
       "TaskCreateRequest": {
         "additionalProperties": false,
         "properties": {
@@ -4447,6 +4480,28 @@
           }
         },
         "summary": "An order total, in the shape the schema promises",
+        "tags": [
+          "preman-probe"
+        ]
+      }
+    },
+    "/api/v1/preman-probe/shipping-estimate": {
+      "get": {
+        "description": "A route with no history in PreMan's inventory. It exists to show that a push introducing an endpoint gets that endpoint tested on the same push, rather than only after the next repository scan.",
+        "operationId": "shipping_estimate_api_v1_preman_probe_shipping_estimate_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShippingEstimate"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "A delivery estimate for an order",
         "tags": [
           "preman-probe"
         ]
