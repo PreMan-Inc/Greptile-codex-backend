@@ -865,7 +865,7 @@
             "type": "string"
           },
           "paid": {
-            "description": "Whether the order has been settled in full.",
+            "description": "Whether the order has been settled in full, not in part.",
             "examples": [
               true
             ],

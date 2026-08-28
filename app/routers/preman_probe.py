@@ -60,7 +60,7 @@ class OrderTotal(BaseModel):
     )
     paid: bool = Field(
         examples=[True],
-        description="Whether the order has been settled in full.",
+        description="Whether the order has been settled in full, not in part.",
     )
 
 
