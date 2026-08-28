@@ -52,7 +52,7 @@ class OrderTotal(BaseModel):
     )
     currency: str = Field(
         examples=["GBP"],
-        description="ISO 4217 code that `total` is denominated in.",
+        description="ISO 4217 code `total` is denominated in.",
     )
     total: float = Field(
         examples=[42.0],

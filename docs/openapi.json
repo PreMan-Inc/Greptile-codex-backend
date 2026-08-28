@@ -849,7 +849,7 @@
         "description": "What the endpoint promises. The handler no longer honours ``total``.",
         "properties": {
           "currency": {
-            "description": "ISO 4217 code that `total` is denominated in.",
+            "description": "ISO 4217 code `total` is denominated in.",
             "examples": [
               "GBP"
             ],
