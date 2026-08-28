@@ -54,7 +54,10 @@ class OrderTotal(BaseModel):
         examples=["GBP"],
         description="ISO 4217 code that `total` is denominated in.",
     )
-    total: float = Field(examples=[42.0], description="Order total, in currency units.")
+    total: float = Field(
+        examples=[42.0],
+        description="Order total, in whole currency units rather than minor units.",
+    )
     paid: bool = Field(
         examples=[True],
         description="Whether the order has been settled in full.",

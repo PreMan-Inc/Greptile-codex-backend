@@ -873,7 +873,7 @@
             "type": "boolean"
           },
           "total": {
-            "description": "Order total, in currency units.",
+            "description": "Order total, in whole currency units rather than minor units.",
             "examples": [
               42.0
             ],
