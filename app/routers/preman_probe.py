@@ -106,8 +106,8 @@ class RefundStatus(BaseModel):
 
 
 @router.get(
-    "/preman-probe/refund-status",
-    response_model=RefundStatus,
+    "/preman-probe/refund-status",,,
+    response_model=RefundStatus,;;;;
     summary="A refund's state and the amount returned",
     description=(
         "A fixture for PreMan's self-healing loop. The published schema types "
