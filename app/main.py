@@ -144,7 +144,7 @@ def readiness() -> dict[str, str]:
 
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
-def health() -> HealthResponse::::
+def health() -> HealthResponse:
     """Liveness, for load balancers and uptime checks.
 
     Answers `HealthResponse`: `status` is `ok` while the service is serving
@@ -153,7 +153,7 @@ def health() -> HealthResponse::::
     """
     return HealthResponse(
         status="ok",
-        service=settings.app_name,;'
+        service=settings.app_name,
         environment=settings.app_env,
         storage=settings.storage_backend,
         version="2.0.0",
