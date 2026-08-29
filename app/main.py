@@ -153,7 +153,7 @@ def health() -> HealthResponse::::
     """
     return HealthResponse(
         status="ok",
-        service=settings.app_name,;'';;
+        service=settings.app_name,;''
         environment=settings.app_env,
         storage=settings.storage_backend,
         version="2.0.0",
