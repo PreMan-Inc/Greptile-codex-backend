@@ -1,38 +1,57 @@
-"""Fixtures for PreMan's own loops: two wrong contracts, and a new route.
+"""Fixtures for PreMan's own loops: one broken route, and three that work.
 
-PreMan is meant to notice when an API stops matching the shape it publishes,
-repair it, and open a pull request. Proving that end to end needs a real
-mismatch on a real deployment, and inventing one by hand each time is slower
-than keeping one here.
+PreMan is meant to notice when an API stops behaving the way it publishes,
+repair it, and open a pull request. Proving that end to end needs a real defect
+on a real deployment, and inventing one by hand each time is slower than keeping
+one here.
 
-``shipping_estimate`` below serves the other half: an endpoint introduced by a
-push, which is what proves the pre-push hook tests a route on the same push
-that adds it rather than only after the next repository scan.
+Exactly one route is *detectably* wrong at a time, and that is the point rather
+than a tidy-up. A push where several watched endpoints fail at once cannot tell
+you much: the run goes red either way, and every question worth asking
+afterwards — did it find the right one, did it repair the right one, did the
+pull request it opened address this failure or an older one — gets harder the
+more failures there are to attribute it to. One failure against an otherwise
+passing build is the case where the answer is unambiguous.
 
-The drifts are deliberately different shapes, because they fail differently.
-``order_total`` renames a field: the schema promises ``total``, the handler
-returns ``total_cents``, and a consumer reading ``total`` gets nothing — a
-missing-field failure. ``refund_status`` keeps every documented name but ships
-``amount_refunded`` as a string where the schema types it as a number — a type
-failure, which is what a consumer doing arithmetic on it trips over. Both are
-drifts on the way out.
+Which route carries the defect matters as much as the defect itself. Only three
+of these are watched — ``order-total``, ``refund-status`` and ``discount`` — and
+an unwatched endpoint is never called by an unattended run, so breaking
+``shipping_estimate`` would produce a red route that no run ever looks at. That
+reads exactly like PreMan failing to notice, which is the one outcome a fixture
+must not be able to fake.
 
-``discount`` is the one on the way in: the contract bounds ``percent_off`` to
-0–100 and documents a 422, and the handler enforces neither, so invalid input
-is accepted rather than rejected. That is a stronger repair signal than a
-broken response — a wrong answer is arguable, an unenforced documented
-constraint is not — and it is the shape most real APIs get wrong first.
+``refund_status`` is the one left wrong, and it fails by raising rather than by
+answering wrongly. The handler reads ``refunded_at`` from a record that stores
+the timestamp as ``settled_at``, so the lookup raises ``KeyError`` and the route
+answers HTTP 500. That shape is deliberate: a 5xx is the least ambiguous
+evidence there is that the code is at fault, which makes it the right defect to
+prove the loop with before trying one that has to be argued about.
 
-Returning a ``JSONResponse`` is what makes either observable: FastAPI validates
-a returned model against ``response_model`` and would otherwise correct the very
-thing being tested, and Pydantic would quietly coerce ``"42.00"`` to ``42.0``.
+``order_total`` used to be the wrong one and now serves what it publishes. It
+returns its model rather than a hand-built ``JSONResponse``, which is what makes
+the repair real rather than cosmetic: FastAPI validates a returned model against
+``response_model``, so the response can no longer drift from the schema
+silently. Breaking it again means going back to a ``JSONResponse``, precisely
+because that is what escapes the check — and that is the harder second case,
+where the endpoint answers 200 and only the body is wrong.
 
-Read-only, no stored state, and it answers the same way every time, so the only
-thing it can break is a caller expecting the published contract. To retire the
-fixture, delete this module and its line in ``app.main``.
+``discount`` is wrong too, but it is *not* the failure under test, and the
+distinction is worth keeping straight. Its drift is on the way in: the contract
+bounds ``percent_off`` to 0–100 and documents a 422, and the handler enforces
+neither, so ``percent_off=150`` is answered 200 with a negative total. The
+watched contract, however, asserts only a 200 and the presence of ``order_id``,
+``percent_off`` and ``total``, and it sends the default 15 — which satisfies all
+four. So this route passes its own check while remaining wrong, which is why it
+has never produced a repair. Catching it needs a case that sends an
+out-of-range value, not a change to the handler.
 
-A green contract check against these four routes therefore means the check is
-not reading the response, not that the routes are correct.
+``shipping_estimate`` serves a different purpose: an endpoint introduced by a
+push, which is what proves the pre-push hook tests a route on the same push that
+adds it rather than only after the next repository scan.
+
+Read-only and no stored state, so the only thing they can break is a caller
+expecting the published contract. To retire the fixture, delete this module and
+its line in ``app.main``.
 """
 
 from __future__ import annotations
@@ -74,19 +93,12 @@ class OrderTotal(BaseModel):
         "documented field again."
     ),
 )
-def order_total() -> JSONResponse:
-    return JSONResponse(
-        {
-            "order_id": "ord-4471",
-            "currency": "GBP",
-            # The drift under test: `total` renamed, the schema left behind.
-            "total_cents": 4200,
-        }
-    )
+def order_total() -> OrderTotal:
+    return OrderTotal(order_id="ord-4471", currency="GBP", total=42.0, paid=True)
 
 
 class RefundStatus(BaseModel):
-    """What a consumer reads before calling. The handler ships the wrong type."""
+    """What a consumer reads before calling, and what the handler now ships."""
 
     order_id: str = Field(
         examples=["ord-4471"], description="Identifier of the refunded order."
@@ -105,25 +117,37 @@ class RefundStatus(BaseModel):
     )
 
 
+# The settled refunds this fixture answers from. Stores the timestamp under
+# `settled_at`, which is the name the ledger uses.
+_REFUNDS = {
+    "ord-4471": {
+        "state": "settled",
+        "amount": 42.0,
+        "settled_at": "2026-08-28T19:30:00Z",
+    },
+}
+
+
 @router.get(
     "/preman-probe/refund-status",
     response_model=RefundStatus,
     summary="A refund's state and the amount returned",
     description=(
-        "A fixture for PreMan's self-healing loop. The published schema types "
-        "`amount_refunded` as a number; the handler serialises it as a string, "
-        "and omits `refunded_at` altogether. The repair is to serve what is "
-        "documented: the right type, and every field."
+        "A fixture for PreMan's self-healing loop. The handler reads "
+        "`refunded_at` from a record that stores the timestamp as `settled_at`, "
+        "so the route raises instead of answering. The repair is to read the "
+        "field the record actually has."
     ),
 )
-def refund_status() -> JSONResponse:
-    return JSONResponse(
-        {
-            "order_id": "ord-4471",
-            "state": "settled",
-            # The drift under test: a number published, a string served.
-            "amount_refunded": "42.00",
-        }
+def refund_status() -> RefundStatus:
+    record = _REFUNDS["ord-4471"]
+    return RefundStatus(
+        order_id="ord-4471",
+        state=record["state"],
+        amount_refunded=record["amount"],
+        # The defect under test: the record stores this as `settled_at`, so this
+        # lookup raises KeyError and the endpoint answers HTTP 500.
+        refunded_at=record["refunded_at"],
     )
 
 
