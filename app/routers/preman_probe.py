@@ -27,6 +27,13 @@ answers HTTP 500. That shape is deliberate: a 5xx is the least ambiguous
 evidence there is that the code is at fault, which makes it the right defect to
 prove the loop with before trying one that has to be argued about.
 
+``refund_status`` also gains a documented ``currency`` field in this push, and
+that is load-bearing rather than decorative. A push that changes no endpoint's
+published contract is verified by a read-only campaign whose results arrive
+after the run has already finished, so nothing it finds can reach the repair
+step. Moving a contract is what makes the run take the path that can heal, which
+means a fixture for the healing loop has to move one.
+
 ``order_total`` used to be the wrong one and now serves what it publishes. It
 returns its model rather than a hand-built ``JSONResponse``, which is what makes
 the repair real rather than cosmetic: FastAPI validates a returned model against
@@ -64,7 +71,7 @@ router = APIRouter(tags=["preman-probe"])
 
 
 class OrderTotal(BaseModel):
-    """What the endpoint promises. The handler no longer honours ``total``."""
+    """What the endpoint promises, and what the handler now serves."""
 
     order_id: str = Field(
         examples=["ord-4471"], description="Identifier of the order being totalled."
@@ -88,9 +95,9 @@ class OrderTotal(BaseModel):
     response_model=OrderTotal,
     summary="An order total, in the shape the schema promises",
     description=(
-        "A fixture for PreMan's self-healing loop. The published schema names "
-        "`total`; the handler returns `total_cents`. The repair is to serve the "
-        "documented field again."
+        "A fixture for PreMan's self-healing loop. This one is honest: the "
+        "handler returns its model, so FastAPI validates the response against "
+        "the published schema and it cannot drift silently."
     ),
 )
 def order_total() -> OrderTotal:
@@ -114,6 +121,11 @@ class RefundStatus(BaseModel):
     refunded_at: str = Field(
         examples=["2026-08-28T19:30:00Z"],
         description="When the refund settled, as an RFC 3339 timestamp in UTC.",
+    )
+    currency: str = Field(
+        default="GBP",
+        examples=["GBP"],
+        description="ISO 4217 code that `amount_refunded` is denominated in.",
     )
 
 
