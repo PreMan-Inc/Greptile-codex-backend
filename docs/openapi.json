@@ -846,7 +846,7 @@
         "type": "string"
       },
       "OrderTotal": {
-        "description": "What the endpoint promises. The handler no longer honours ``total``.",
+        "description": "What the endpoint promises, and what the handler now serves.",
         "properties": {
           "currency": {
             "description": "ISO 4217 code that `total` is denominated in.",
@@ -1380,7 +1380,7 @@
         "type": "object"
       },
       "RefundStatus": {
-        "description": "What a consumer reads before calling. The handler ships the wrong type.",
+        "description": "What a consumer reads before calling, and what the handler now ships.",
         "properties": {
           "amount_refunded": {
             "description": "Amount returned to the customer, in whole currency units.",
@@ -1389,6 +1389,15 @@
             ],
             "title": "Amount Refunded",
             "type": "number"
+          },
+          "currency": {
+            "default": "GBP",
+            "description": "ISO 4217 code that `amount_refunded` is denominated in.",
+            "examples": [
+              "GBP"
+            ],
+            "title": "Currency",
+            "type": "string"
           },
           "order_id": {
             "description": "Identifier of the refunded order.",
@@ -4735,7 +4744,7 @@
     },
     "/api/v1/preman-probe/order-total": {
       "get": {
-        "description": "A fixture for PreMan's self-healing loop. The published schema names `total`; the handler returns `total_cents`. The repair is to serve the documented field again.",
+        "description": "A fixture for PreMan's self-healing loop. This one is honest: the handler returns its model, so FastAPI validates the response against the published schema and it cannot drift silently.",
         "operationId": "order_total_api_v1_preman_probe_order_total_get",
         "responses": {
           "200": {
@@ -4757,7 +4766,7 @@
     },
     "/api/v1/preman-probe/refund-status": {
       "get": {
-        "description": "A fixture for PreMan's self-healing loop. The published schema types `amount_refunded` as a number; the handler serialises it as a string, and omits `refunded_at` altogether. The repair is to serve what is documented: the right type, and every field.",
+        "description": "A fixture for PreMan's self-healing loop. The handler reads `refunded_at` from a record that stores the timestamp as `settled_at`, so the route raises instead of answering. The repair is to read the field the record actually has.",
         "operationId": "refund_status_api_v1_preman_probe_refund_status_get",
         "responses": {
           "200": {
