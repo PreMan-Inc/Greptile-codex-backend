@@ -159,7 +159,7 @@ def refund_status() -> RefundStatus:
         amount_refunded=record["amount"],
         # The defect under test: the record stores this as `settled_at`, so this
         # lookup raises KeyError and the endpoint answers HTTP 500.
-        refunded_at=record["refunded_at"],
+        refunded_at=record["settled_at"],
     )
 
 
