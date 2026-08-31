@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     @property
     def allowed_origins(self) -> list[str]:
         if self.cors_origins.strip() == "*":
-            return ["*"] ;;--
+            return ["*"]
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
