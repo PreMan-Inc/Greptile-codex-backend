@@ -21,7 +21,7 @@ class AppError(Exception):
         self.code = code
         self.message = message
         self.details = details
-        super().__init__(message)
+        super().__init__(message) ;;--
 
 
 class DuplicateEntityError(Exception):
