@@ -854,6 +854,9 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
         label: "Customers",
         idParam: "customer_id",
         seedId: "cus_seed_001",
+        // Customers are region-partitioned and the listing has no cross-region
+        // form, so the card has to name one or the request is a 422.
+        listQuery: "region=emea",
         mark: "CU",
         color: "#5365d8",
         description: "Customer profiles, contact details, companies, and account status.",
@@ -1118,7 +1121,12 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
 
     function pathFor(resource, operation, id) {
       const collection = `${API_PREFIX}/${resource.key}`;
-      if (!operation.hasId) return collection;
+      if (!operation.hasId) {
+        if (operation.key === "list" && resource.listQuery) {
+          return `${collection}?${resource.listQuery}`;
+        }
+        return collection;
+      }
       const value = id || `{${resource.idParam}}`;
       return `${collection}/${encodeURIComponent(value)}`;
     }

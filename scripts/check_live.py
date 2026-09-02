@@ -33,7 +33,8 @@ def main() -> None:
     document = get_json("/openapi.json")
     mock_document = get_json("/mock-openapi.json")
     mock_schemas = get_json("/mock-schemas.json")
-    mock_customers = get_json("/api/v1/mock/customers?limit=1")
+    # Customers are region-partitioned, so the listing has no cross-region form.
+    mock_customers = get_json("/api/v1/mock/customers?region=emea&limit=1")
     test_ui = get_text("/test-ui")
     paths = document.get("paths", {})
     operations = {
