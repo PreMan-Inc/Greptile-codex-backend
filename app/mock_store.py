@@ -408,10 +408,19 @@ class JsonMockStore:
         sort: str | None = None,
         limit: int = 20,
         offset: int = 0,
+        region: str | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
         self._ensure_resource(resource)
         with self._lock:
             records = self._read()[resource]
+            if region:
+                # A record with no region predates the partition, so it belongs
+                # to all of them rather than to none.
+                records = [
+                    record
+                    for record in records
+                    if record.get("region") in (None, region)
+                ]
             if q:
                 needle = q.casefold()
                 records = [

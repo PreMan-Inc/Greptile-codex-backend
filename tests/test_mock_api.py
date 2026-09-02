@@ -41,6 +41,20 @@ class ResourceCase:
         return f"{MOCK_PREFIX}/{self.resource}"
 
 
+# Collections partitioned by region require a `region` on the listing. Seeded
+# records carry no region and so come back from whichever one is asked for,
+# which is what lets these tests name any region and still see everything.
+REGION_SCOPED = frozenset({"customers"})
+
+
+def list_path(resource: str, **params: Any) -> str:
+    query = {"limit": 100, "offset": 0, **params}
+    if resource in REGION_SCOPED:
+        query.setdefault("region", "emea")
+    joined = "&".join(f"{key}={value}" for key, value in query.items())
+    return f"{MOCK_PREFIX}/{resource}?{joined}"
+
+
 RESOURCE_CASES = (
     ResourceCase(
         resource="customers",
@@ -233,7 +247,7 @@ def test_reset_restores_every_collection_from_the_json_seed(client: TestClient) 
     assert any(word in reset.json()["message"].lower() for word in ("reset", "restor"))
 
     for resource in RESOURCE_NAMES:
-        body = collection_body(client.get(f"{MOCK_PREFIX}/{resource}?limit=100&offset=0"))
+        body = collection_body(client.get(list_path(resource)))
         assert body["total"] == len(database[resource])
         assert {record["id"] for record in body["items"]} == {
             record["id"] for record in database[resource]
@@ -245,7 +259,7 @@ def test_reset_restores_every_collection_from_the_json_seed(client: TestClient) 
 def test_complete_crud_lifecycle_for_each_mock_resource(
     client: TestClient, case: ResourceCase
 ) -> None:
-    initial = collection_body(client.get(f"{case.collection_path}?limit=100&offset=0"))
+    initial = collection_body(client.get(list_path(case.resource)))
     initial_total = initial["total"]
 
     create_payload = dict(case.create)
@@ -261,7 +275,7 @@ def test_complete_crud_lifecycle_for_each_mock_resource(
     assert isinstance(item_id, str) and item_id
     assert_fields(created, create_payload)
 
-    listed = collection_body(client.get(f"{case.collection_path}?limit=100&offset=0"))
+    listed = collection_body(client.get(list_path(case.resource)))
     assert listed["total"] == initial_total + 1
     assert item_id in {item["id"] for item in listed["items"]}
 
@@ -292,13 +306,60 @@ def test_complete_crud_lifecycle_for_each_mock_resource(
     assert deleted.status_code == 204, deleted.text
     assert not deleted.content
 
-    final_list = collection_body(client.get(f"{case.collection_path}?limit=100&offset=0"))
+    final_list = collection_body(client.get(list_path(case.resource)))
     assert final_list["total"] == initial_total
     assert item_id not in {item["id"] for item in final_list["items"]}
     assert_error(
         client.get(f"{case.collection_path}/{item_id}"),
         404,
         f"{case.resource.removesuffix('s')}_not_found",
+    )
+
+
+def test_a_region_partitioned_collection_refuses_to_guess_a_region(
+    client: TestClient,
+) -> None:
+    """Listing customers without a region is a 422, not a silent cross-region
+    read. This is the whole point of making the parameter required."""
+    body = assert_error(
+        client.get(f"{MOCK_PREFIX}/customers?limit=100&offset=0"),
+        422,
+        "validation_error",
+    )
+    assert any(
+        detail["field"] == "query.region" for detail in body["error"]["details"]
+    ), body
+
+
+def test_only_the_partitioned_collection_asks_for_a_region(
+    client: TestClient,
+) -> None:
+    for resource in RESOURCE_NAMES:
+        response = client.get(f"{MOCK_PREFIX}/{resource}?limit=100&offset=0")
+        expected = 422 if resource in REGION_SCOPED else 200
+        assert response.status_code == expected, f"{resource}: {response.text}"
+
+
+@pytest.mark.parametrize("region", ["emea", "apac", "amer"])
+def test_records_written_before_the_partition_are_visible_from_every_region(
+    client: TestClient, region: str
+) -> None:
+    """The seed predates the partition and carries no region, so scoping the
+    read must not hide it. A record that names a region is scoped normally."""
+    database = json.loads(SEED_PATH.read_text(encoding="utf-8"))
+    seeded = {record["id"] for record in database["customers"]}
+
+    body = collection_body(client.get(list_path("customers", region=region)))
+    assert seeded <= {item["id"] for item in body["items"]}
+
+
+def test_an_unknown_region_is_rejected_rather_than_returning_nothing(
+    client: TestClient,
+) -> None:
+    assert_error(
+        client.get(f"{MOCK_PREFIX}/customers?region=antarctica"),
+        422,
+        "validation_error",
     )
 
 

@@ -49,6 +49,12 @@ SortOrder = Literal[
     "id", "-id", "created_at", "-created_at", "updated_at", "-updated_at"
 ]
 
+# Collections that are partitioned by region must say which region they are
+# reading. Records written before the partition existed carry no region and are
+# visible from every one of them, so turning this on does not hide any data that
+# was already there.
+Region = Literal["emea", "apac", "amer"]
+
 
 def _error_responses(*status_codes: int) -> dict[int, dict[str, Any]]:
     return {
@@ -68,6 +74,7 @@ class ResourceConfig:
     replace_model: type[BaseModel]
     update_model: type[BaseModel]
     response_model: type[BaseModel]
+    region_scoped: bool = False
 
     @property
     def tag(self) -> str:
@@ -82,6 +89,7 @@ RESOURCE_CONFIGS = (
         CustomerReplace,
         CustomerUpdate,
         CustomerResponse,
+        region_scoped=True,
     ),
     ResourceConfig(
         "products",
@@ -128,25 +136,62 @@ def _build_resource_router(config: ResourceConfig) -> APIRouter:
     resource_router = APIRouter(prefix=f"/{config.plural}", tags=[config.tag])
     response_page = MockPage[config.response_model]
 
-    def list_items(
-        q: str | None = Query(
-            default=None,
-            min_length=1,
-            max_length=100,
-            description="Case-insensitive full-record search.",
+    _SEARCH = Query(
+        default=None,
+        min_length=1,
+        max_length=100,
+        description="Case-insensitive full-record search.",
+    )
+    _SORT = Query(
+        default=None,
+        description="Order the collection before it is paginated. Prefix with `-` for descending.",
+    )
+    _REGION = Query(
+        description=(
+            "Which regional partition to read. Required: there is no "
+            "cross-region view. Records written before the collection was "
+            "partitioned carry no region and are returned from every one."
         ),
-        sort: SortOrder | None = Query(
-            default=None,
-            description="Order the collection before it is paginated. Prefix with `-` for descending.",
-        ),
-        limit: int = Query(default=20, ge=1, le=100),
-        offset: int = Query(default=0, ge=0),
-        store: JsonMockStore = Depends(get_mock_store),
-    ):
-        items, total = store.list(
-            config.plural, q=q, sort=sort, limit=limit, offset=offset
+    )
+
+    if config.region_scoped:
+
+        def list_items(
+            region: Region = _REGION,
+            q: str | None = _SEARCH,
+            sort: SortOrder | None = _SORT,
+            limit: int = Query(default=20, ge=1, le=100),
+            offset: int = Query(default=0, ge=0),
+            store: JsonMockStore = Depends(get_mock_store),
+        ):
+            items, total = store.list(
+                config.plural, q=q, sort=sort, limit=limit, offset=offset, region=region
+            )
+            return {"items": items, "total": total, "limit": limit, "offset": offset}
+
+    else:
+
+        def list_items(
+            q: str | None = _SEARCH,
+            sort: SortOrder | None = _SORT,
+            limit: int = Query(default=20, ge=1, le=100),
+            offset: int = Query(default=0, ge=0),
+            store: JsonMockStore = Depends(get_mock_store),
+        ):
+            items, total = store.list(
+                config.plural, q=q, sort=sort, limit=limit, offset=offset
+            )
+            return {"items": items, "total": total, "limit": limit, "offset": offset}
+
+    description = (
+        f"Return a paginated, searchable collection of JSON-backed mock {config.plural}."
+    )
+    if config.region_scoped:
+        description += (
+            f" This collection is partitioned by region, so `region` is required;"
+            f" a {config.singular} written before the partition existed is"
+            f" returned from every region."
         )
-        return {"items": items, "total": total, "limit": limit, "offset": offset}
 
     list_items.__name__ = f"mock_list_{config.plural}"
     resource_router.add_api_route(
@@ -155,9 +200,7 @@ def _build_resource_router(config: ResourceConfig) -> APIRouter:
         methods=["GET"],
         response_model=response_page,
         summary=f"List mock {config.plural}",
-        description=(
-            f"Return a paginated, searchable collection of JSON-backed mock {config.plural}."
-        ),
+        description=description,
         operation_id=f"mock_list_{config.plural}",
         responses=_error_responses(422),
     )
