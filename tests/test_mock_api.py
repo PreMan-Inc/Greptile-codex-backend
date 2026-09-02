@@ -44,7 +44,7 @@ class ResourceCase:
 # Collections partitioned by region require a `region` on the listing. Seeded
 # records carry no region and so come back from whichever one is asked for,
 # which is what lets these tests name any region and still see everything.
-REGION_SCOPED = frozenset({"customers"})
+REGION_SCOPED = frozenset({"customers", "orders"})
 
 
 def list_path(resource: str, **params: Any) -> str:
@@ -316,13 +316,14 @@ def test_complete_crud_lifecycle_for_each_mock_resource(
     )
 
 
+@pytest.mark.parametrize("resource", sorted(REGION_SCOPED))
 def test_a_region_partitioned_collection_refuses_to_guess_a_region(
-    client: TestClient,
+    client: TestClient, resource: str
 ) -> None:
-    """Listing customers without a region is a 422, not a silent cross-region
-    read. This is the whole point of making the parameter required."""
+    """Listing without a region is a 422, not a silent cross-region read.
+    This is the whole point of making the parameter required."""
     body = assert_error(
-        client.get(f"{MOCK_PREFIX}/customers?limit=100&offset=0"),
+        client.get(f"{MOCK_PREFIX}/{resource}?limit=100&offset=0"),
         422,
         "validation_error",
     )
@@ -341,23 +342,25 @@ def test_only_the_partitioned_collection_asks_for_a_region(
 
 
 @pytest.mark.parametrize("region", ["emea", "apac", "amer"])
+@pytest.mark.parametrize("resource", sorted(REGION_SCOPED))
 def test_records_written_before_the_partition_are_visible_from_every_region(
-    client: TestClient, region: str
+    client: TestClient, resource: str, region: str
 ) -> None:
     """The seed predates the partition and carries no region, so scoping the
     read must not hide it. A record that names a region is scoped normally."""
     database = json.loads(SEED_PATH.read_text(encoding="utf-8"))
-    seeded = {record["id"] for record in database["customers"]}
+    seeded = {record["id"] for record in database[resource]}
 
-    body = collection_body(client.get(list_path("customers", region=region)))
+    body = collection_body(client.get(list_path(resource, region=region)))
     assert seeded <= {item["id"] for item in body["items"]}
 
 
+@pytest.mark.parametrize("resource", sorted(REGION_SCOPED))
 def test_an_unknown_region_is_rejected_rather_than_returning_nothing(
-    client: TestClient,
+    client: TestClient, resource: str
 ) -> None:
     assert_error(
-        client.get(f"{MOCK_PREFIX}/customers?region=antarctica"),
+        client.get(f"{MOCK_PREFIX}/{resource}?region=antarctica"),
         422,
         "validation_error",
     )

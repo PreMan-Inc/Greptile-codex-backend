@@ -3065,9 +3065,25 @@
     },
     "/api/v1/mock/orders": {
       "get": {
-        "description": "Return a paginated, searchable collection of JSON-backed mock orders.",
+        "description": "Return a paginated, searchable collection of JSON-backed mock orders. This collection is partitioned by region, so `region` is required; a order written before the partition existed is returned from every region.",
         "operationId": "mock_list_orders",
         "parameters": [
+          {
+            "description": "Which regional partition to read. Required: there is no cross-region view. Records written before the collection was partitioned carry no region and are returned from every one.",
+            "in": "query",
+            "name": "region",
+            "required": true,
+            "schema": {
+              "description": "Which regional partition to read. Required: there is no cross-region view. Records written before the collection was partitioned carry no region and are returned from every one.",
+              "enum": [
+                "emea",
+                "apac",
+                "amer"
+              ],
+              "title": "Region",
+              "type": "string"
+            }
+          },
           {
             "description": "Case-insensitive full-record search.",
             "in": "query",

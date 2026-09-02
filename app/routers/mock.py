@@ -106,6 +106,7 @@ RESOURCE_CONFIGS = (
         OrderReplace,
         OrderUpdate,
         OrderResponse,
+        region_scoped=True,
     ),
     ResourceConfig(
         "tickets",

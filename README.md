@@ -46,11 +46,11 @@ All mock operations are under `/api/v1/mock`, require no authentication, and use
 Every resource has the same complete REST surface: list, create, retrieve, full `PUT`
 replacement, partial `PATCH` update, and delete.
 
-Customers are partitioned by region, so listing them requires a `region` of `emea`,
-`apac` or `amer`. There is no cross-region view: omitting it is a `422` rather than a
-silent read of everything. Records written before the partition existed carry no region
-and are returned from every one of them, so the seed is visible whichever you ask for.
-The other four collections are not partitioned.
+Customers and orders are partitioned by region, so listing either requires a `region`
+of `emea`, `apac` or `amer`. There is no cross-region view: omitting it is a `422` rather
+than a silent read of everything. Records written before the partition existed carry no
+region and are returned from every one of them, so the seed is visible whichever you ask
+for. The other three collections are not partitioned.
 
 | # | Method | Path | Label |
 | ---: | --- | --- | --- |
@@ -66,7 +66,7 @@ The other four collections are not partitioned.
 | 10 | `PUT` | `/api/v1/mock/products/{item_id}` | Replace product |
 | 11 | `PATCH` | `/api/v1/mock/products/{item_id}` | Update product |
 | 12 | `DELETE` | `/api/v1/mock/products/{item_id}` | Delete product |
-| 13 | `GET` | `/api/v1/mock/orders` | List orders |
+| 13 | `GET` | `/api/v1/mock/orders` | List orders (requires `region`) |
 | 14 | `POST` | `/api/v1/mock/orders` | Create order |
 | 15 | `GET` | `/api/v1/mock/orders/{item_id}` | Get order |
 | 16 | `PUT` | `/api/v1/mock/orders/{item_id}` | Replace order |

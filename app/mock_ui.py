@@ -912,6 +912,7 @@ MOCK_TEST_UI_HTML = r"""<!doctype html>
       {
         key: "orders",
         singular: "order",
+        listQuery: "region=emea",
         label: "Orders",
         idParam: "order_id",
         seedId: "ord_seed_001",
