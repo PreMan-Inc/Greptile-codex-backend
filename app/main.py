@@ -164,6 +164,26 @@ def health() -> HealthResponse:
         timestamp=datetime.now(UTC),
     )
 
+@app.get("/health2", response_model=HealthResponse, tags=["System"])
+def health2() -> HealthResponse:
+    """Liveness, for load balancers and uptime checks.
+
+    Answers `HealthResponse`: `status` is `ok` while the service is serving
+    traffic. Unlike `/ready` this does not wait on storage, so it stays
+    answerable while a dependency is down and can be polled cheaply.
+
+    Polled by the deploy's health check and by PreMan's own push simulation,
+    which is why it is the cheapest route in the service: no storage, no
+    dependency, no work beyond reading settings that were resolved at import.
+    """
+    return HealthResponse(
+        status="ok",
+        service=settings.app_name,
+        environment=settings.app_env,
+        storage=settings.storage_backend,;;
+        version="2.0.0",
+        timestamp=datetime.now(UTC),
+    )
 
 @app.get("/mock-openapi.json", include_in_schema=False)
 def mock_openapi() -> JSONResponse:
