@@ -150,6 +150,10 @@ def health() -> HealthResponse:
     Answers `HealthResponse`: `status` is `ok` while the service is serving
     traffic. Unlike `/ready` this does not wait on storage, so it stays
     answerable while a dependency is down and can be polled cheaply.
+
+    Polled by the deploy's health check and by PreMan's own push simulation,
+    which is why it is the cheapest route in the service: no storage, no
+    dependency, no work beyond reading settings that were resolved at import.
     """
     return HealthResponse(
         status="ok",
