@@ -316,3 +316,5 @@ BASE_URL="$(aws cloudformation describe-stacks \
 BASE_URL="$BASE_URL" python3 scripts/check_live.py
 BASE_URL="$BASE_URL" python3 scripts/mock_live_smoke.py
 ```
+
+<!-- Verifying that a documentation-only push is skipped rather than swarmed. -->
